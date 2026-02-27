@@ -73,22 +73,40 @@ class NanoBananaSelectionLayer {
       // Immediately disable event processing to prevent PixiJS from dispatching
       // further events (pointerout, pointermove) on this container.
       this._container.eventMode = "none";
+      this._container.interactiveChildren = false;
 
       this._container.off("pointerdown", this._onPointerDown);
       this._container.off("pointermove", this._onPointerMove);
       this._container.off("pointerup", this._onPointerUp);
       this._container.off("pointerupoutside", this._onPointerUp);
 
-      // Defer removal from stage to avoid "Cannot find propagation path to
-      // disconnected target" errors when deactivate is called during an event
-      // handler (e.g. pointerup). PixiJS EventBoundary still references the
-      // container for the remainder of the current event dispatch cycle.
+      // Hide the container visually while it remains in the display tree.
+      this._container.visible = false;
+
+      // Purge this container from the PixiJS EventBoundary's internal
+      // "over targets" tracking. Without this, the EventBoundary would
+      // try to dispatch a pointerout event to the container after it has
+      // been removed from the stage, triggering "Cannot find propagation
+      // path to disconnected target".
       const containerRef = this._container;
+      _purgeFromEventBoundary(containerRef);
+
+      // Temporarily suppress the specific PixiJS error as a safety net in
+      // case the EventBoundary internal API differs across PixiJS versions.
+      const removeHandler = _suppressDisconnectedTargetError();
+
+      // Defer removal from stage to avoid errors when deactivate is called
+      // during an event handler (e.g. pointerup). PixiJS EventBoundary may
+      // still reference the container for the remainder of the current
+      // event dispatch cycle.
       requestAnimationFrame(() => {
         if (containerRef.parent) {
           containerRef.parent.removeChild(containerRef);
         }
         containerRef.destroy({ children: true });
+        // Keep the error handler active briefly after removal so it covers
+        // any pointer events that fire before PixiJS fully clears tracking.
+        setTimeout(removeHandler, 2000);
       });
 
       this._container = null;
@@ -143,6 +161,56 @@ class NanoBananaSelectionLayer {
     const height = Math.abs(end.y - start.y);
     return { x, y, width, height };
   }
+}
+
+/**
+ * Remove a display object from the PixiJS EventBoundary's internal "over
+ * targets" tracking table.  This prevents "Cannot find propagation path to
+ * disconnected target" errors when the object is later removed from the stage.
+ *
+ * @param {PIXI.Container} target - The display object to purge
+ */
+function _purgeFromEventBoundary(target) {
+  try {
+    const boundary = canvas.app?.renderer?.events?.rootBoundary;
+    if (!boundary) return;
+
+    // PixiJS EventBoundary tracks which targets each pointer is "over"
+    // in the `overTargets` property (Record<number, Container[]>).
+    const overTargets = boundary.overTargets;
+    if (!overTargets || typeof overTargets !== "object") return;
+
+    for (const key of Object.keys(overTargets)) {
+      const targets = overTargets[key];
+      if (Array.isArray(targets)) {
+        overTargets[key] = targets.filter((t) => t !== target);
+      }
+    }
+  } catch {
+    // Best-effort cleanup; ignore errors from unexpected PixiJS internals.
+  }
+}
+
+/**
+ * Install a temporary window-level error handler that suppresses the PixiJS
+ * EventBoundary "disconnected target" error.  Returns a function that removes
+ * the handler when called.
+ *
+ * @returns {function} Cleanup function to remove the handler
+ */
+function _suppressDisconnectedTargetError() {
+  const handler = (event) => {
+    if (
+      event.error?.message?.includes(
+        "Cannot find propagation path to disconnected target"
+      )
+    ) {
+      console.debug("nanobanana-map-editor | Suppressed PixiJS disconnected target error during cleanup");
+      event.preventDefault();
+    }
+  };
+  window.addEventListener("error", handler);
+  return () => window.removeEventListener("error", handler);
 }
 
 // Singleton instance
