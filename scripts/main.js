@@ -42,6 +42,7 @@ class NanoBananaSelectionLayer {
     // Create a PIXI container for the selection rectangle
     this._container = new PIXI.Container();
     this._container.eventMode = "static";
+    // Large hit area covers the entire possible canvas area for pointer events
     this._container.hitArea = new PIXI.Rectangle(
       -1e7, -1e7, 2e7, 2e7
     );

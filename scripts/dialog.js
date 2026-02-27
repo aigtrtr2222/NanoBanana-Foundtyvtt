@@ -51,6 +51,7 @@ export async function showPromptDialog(previewBase64, rect) {
           icon: "fas fa-magic",
           default: true,
           callback: (event, button, html) => {
+            // DialogV2 may pass different root elements depending on version
             const form = html.querySelector("form") ?? html.closest(".dialog-content")?.querySelector("form");
             if (!form) {
               resolve(null);
@@ -58,7 +59,7 @@ export async function showPromptDialog(previewBase64, rect) {
             }
             const prompt = form.querySelector('[name="prompt"]')?.value?.trim();
             if (!prompt) {
-              ui.notifications.warn("Please enter a prompt.");
+              ui.notifications.warn(game.i18n.localize("NANOBANANA.ErrorNoPrompt"));
               resolve(null);
               return;
             }

@@ -29,6 +29,7 @@ export async function sendImg2Img(imageBase64, options) {
   const endpoint = `${baseUrl}/sdapi/v1/img2img`;
 
   const payload = {
+    // Property names use snake_case as required by the Stable Diffusion WebUI API
     init_images: [imageBase64],
     prompt: options.prompt || "",
     negative_prompt:
