@@ -14,6 +14,7 @@
  *
  * @param {string} base64Image - Base64-encoded PNG image (without data URI prefix)
  * @param {number} [threshold=30] - Color distance threshold for white detection (0–441).
+ *   The maximum possible distance is ~441 (sqrt(255²+255²+255²), i.e. black vs white).
  *   Lower values require pixels to be closer to pure white to be removed.
  *   Default of 30 handles slight off-white and JPEG-artifact grays.
  * @returns {Promise<string>} Base64-encoded PNG with transparent background (without data URI prefix)
