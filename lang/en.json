@@ -17,5 +17,12 @@
   "NANOBANANA.ErrorApiFailed": "Failed to communicate with Google AI API: {error}",
   "NANOBANANA.ErrorNoScene": "No active scene found.",
   "NANOBANANA.ErrorNoPrompt": "Please enter a prompt.",
-  "NANOBANANA.ErrorCaptureFailed": "Failed to capture the selected region."
+  "NANOBANANA.ErrorCaptureFailed": "Failed to capture the selected region.",
+  "NANOBANANA.FlattenTitle": "Flatten Tiles to Background",
+  "NANOBANANA.FlattenConfirm": "This will capture the entire map, replace the background image, and remove all {count} tile(s). This cannot be undone. Continue?",
+  "NANOBANANA.FlattenExecute": "Flatten",
+  "NANOBANANA.FlattenCapturing": "Capturing full scene...",
+  "NANOBANANA.FlattenSuccess": "Tiles flattened into background successfully!",
+  "NANOBANANA.FlattenFailed": "Failed to flatten tiles: {error}",
+  "NANOBANANA.FlattenNoTiles": "No tiles to flatten."
 }
