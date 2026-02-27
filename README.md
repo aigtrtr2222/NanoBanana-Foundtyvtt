@@ -1,13 +1,23 @@
 # NanoBanana Map Editor for Foundry VTT v13
 
-A Foundry VTT v13 module that lets you edit maps using **NanoBanana** (Google Generative AI) image generation. Capture a region of the map, enter a prompt, and the AI-modified image is placed as a tile—making it look like the map itself was edited.
+A Foundry VTT v13 module that lets you edit maps, character portraits, and tokens using **NanoBanana** (Google Generative AI) image generation. Capture a region of the map, enter a prompt, and the AI-modified image is placed as a tile—making it look like the map itself was edited. Also edit character portraits and tokens directly from the character sheet, or generate tokens from portrait images using style examples.
 
 ## How It Works
+
+### Map Editing
 
 1. **Select** – Activate the NanoBanana tool from the Tiles control bar, then drag to select a rectangular region on the map.
 2. **Prompt** – A dialog appears showing a preview of the captured area. Choose a model and enter a text prompt describing how you want to modify the region.
 3. **Generate** – The captured image and prompt are sent to the Google Generative AI API.
 4. **Place** – The AI-generated result image is automatically uploaded and placed as a tile at the exact same position, visually modifying the map.
+
+### Character Portrait & Token Editing / 캐릭터 포트레잇 & 토큰 편집
+
+NanoBanana buttons appear above the character sheet tabs, providing three features:
+
+- **Edit Portrait** – Modify the character's portrait image using AI. Select a model, enter a prompt describing the desired changes, and the portrait is regenerated.
+- **Edit Token** – Modify the character's token image using AI, with the same model selection and prompt workflow.
+- **Generate Token** – Generate a new token from the character's portrait image. You can place token style examples in the `nanobanana-map-editor/token-examples/` folder (with optional `.txt` prompt files sharing the same name), and the AI will use those examples as style references to create a matching token.
 
 ## Requirements
 
@@ -77,6 +87,8 @@ Go to **Settings → Module Settings → NanoBanana Map Editor**:
 
 ## Usage
 
+### Map Editing
+
 1. Open a scene with a map background.
 2. Switch to the **Tiles** control group in the left toolbar.
 3. Click the **✨ NanoBanana Map Editor** button (wand icon).
@@ -87,25 +99,46 @@ Go to **Settings → Module Settings → NanoBanana Map Editor**:
 6. Click **Generate** and wait for the AI to process.
 7. The result is placed as a tile on the map.
 
+### Portrait & Token Editing / 포트레잇 & 토큰 편집
+
+1. Open a character sheet.
+2. Above the sheet tabs, you will see three NanoBanana buttons:
+   - **Edit Portrait** – Modify the character's portrait with AI
+   - **Edit Token** – Modify the character's token with AI
+   - **Generate Token** – Generate a token from the portrait using style examples
+3. Click a button, select a **model**, enter a **prompt**, then click **Generate**.
+4. The character's portrait or token is automatically updated.
+
+#### Token Style Examples / 토큰 스타일 예시
+
+To use style references when generating tokens:
+
+1. Place example token images (`.png`, `.jpg`, `.jpeg`, `.webp`) in the `nanobanana-map-editor/token-examples/` folder inside your Foundry VTT data directory.
+2. Optionally, add a `.txt` file with the same name as each image to provide a style description prompt.
+3. When generating a token, select which examples to use as style references from the gallery.
+
 ## Module Structure
 
 ```
 nanobanana-map-editor/
-├── module.json           # Module manifest
+├── module.json              # Module manifest
 ├── scripts/
-│   ├── main.js           # Entry point, hooks, selection tool
-│   ├── settings.js       # Module settings registration
-│   ├── api.js            # Google Generative AI API communication
-│   ├── capture.js        # Canvas region capture
-│   ├── dialog.js         # Prompt input dialog
-│   └── tile.js           # Tile placement logic
+│   ├── main.js              # Entry point, hooks, selection tool, character sheet buttons
+│   ├── settings.js          # Module settings registration
+│   ├── api.js               # Google Generative AI API communication
+│   ├── capture.js           # Canvas region capture
+│   ├── dialog.js            # Prompt input dialog (map editing)
+│   ├── tile.js              # Tile placement logic
+│   ├── flatten.js           # Flatten tiles into background
+│   ├── portrait.js          # Portrait/token image loading, uploading, and updating
+│   └── portrait-dialog.js   # Portrait/token editing and generation dialogs
 ├── styles/
-│   └── nanobanana.css    # Module styles
+│   └── nanobanana.css       # Module styles
 ├── lang/
-│   ├── en.json           # English localization
-│   └── ko.json           # Korean (한국어) localization
+│   ├── en.json              # English localization
+│   └── ko.json              # Korean (한국어) localization
 ├── .github/workflows/
-│   └── release.yml       # Auto-release on tag push
+│   └── release.yml          # Auto-release on tag push
 └── README.md
 ```
 
