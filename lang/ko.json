@@ -1,0 +1,37 @@
+{
+  "NANOBANANA": {
+    "CaptureRegion": "영역 캡처 & 편집 (NanoBanana)",
+
+    "DialogTitle":         "NanoBanana 맵 편집기",
+    "PromptLabel":         "편집 프롬프트",
+    "PromptPlaceholder":   "예: 구석에 불타는 벽난로를 추가해줘",
+    "Edit":                "AI로 편집",
+    "Cancel":              "취소",
+
+    "Processing": "NanoBanana: AI에 전송 중, 잠시 기다려 주세요…",
+    "Success":    "NanoBanana: 타일이 성공적으로 배치되었습니다!",
+    "Error":      "NanoBanana: 오류",
+
+    "Settings": {
+      "ApiUrl":            "NanoBanana2 API URL",
+      "ApiUrlHint":        "NanoBanana2 서버의 기본 URL (예: http://localhost:7860). 모듈은 <url>/edit 엔드포인트에 POST 요청을 보냅니다.",
+      "ApiKey":            "NanoBanana2 API 키",
+      "ApiKeyHint":        "선택사항: Bearer 토큰 / API 키. 서버에 인증이 필요 없는 경우 비워두세요.",
+      "UploadFolder":      "업로드 폴더",
+      "UploadFolderHint":  "편집된 이미지가 저장될 FoundryVTT 데이터 폴더 (기본값: nanobanana-edits)."
+    },
+
+    "Keybinding": {
+      "ToggleCapture":     "NanaBanana 캡처 모드 토글",
+      "ToggleCaptureHint": "드래그 캡처 오버레이를 활성화하거나 비활성화합니다 (기본 단축키: Alt+M)."
+    },
+
+    "Errors": {
+      "NetworkError":       "NanoBanana2 서버에 연결할 수 없습니다 ({endpoint}): {message}",
+      "ApiError":           "NanoBanana2 API 오류 {status} {statusText}. {detail}",
+      "InvalidJson":        "NanoBanana2 API가 잘못된 JSON 응답을 반환했습니다.",
+      "NoImageInResponse":  "NanoBanana2 응답에 이미지 데이터가 없습니다. 수신된 키: [{keys}]",
+      "UploadFailed":       "파일 업로드에 실패했습니다. FoundryVTT 데이터 폴더 권한을 확인하세요."
+    }
+  }
+}

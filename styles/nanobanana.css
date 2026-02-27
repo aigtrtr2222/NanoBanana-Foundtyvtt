@@ -1,0 +1,70 @@
+/* ============================================================
+   NanoBanana Map Editor – styles
+   ============================================================ */
+
+/* ------------------------------------------------------------------
+   Drag-select overlay (covers the whole #board when capture is active)
+   ------------------------------------------------------------------ */
+#nanobanana-overlay {
+  position: absolute;
+  inset: 0;                 /* top/right/bottom/left = 0 */
+  z-index: 9999;
+  cursor: crosshair;
+}
+
+/* The animated selection rectangle drawn while dragging */
+#nanobanana-selection {
+  position: absolute;
+  display: none;
+  border: 2px dashed #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+  pointer-events: none;
+  box-sizing: border-box;
+  /* Pulse the outline so it stands out on any background */
+  animation: nanobanana-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes nanobanana-pulse {
+  from { border-color: #00ff88; box-shadow: 0 0 6px #00ff88; }
+  to   { border-color: #00ccff; box-shadow: 0 0 12px #00ccff; }
+}
+
+/* ------------------------------------------------------------------
+   Prompt dialog
+   ------------------------------------------------------------------ */
+.nanobanana-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.nanobanana-preview {
+  margin: 0;
+  text-align: center;
+}
+
+.nanobanana-preview img {
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border: 1px solid var(--color-border-light-tertiary, #888);
+  border-radius: 4px;
+  background: #111;
+}
+
+.nanobanana-dialog .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nanobanana-dialog .form-group label {
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.nanobanana-dialog .form-group input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+}
