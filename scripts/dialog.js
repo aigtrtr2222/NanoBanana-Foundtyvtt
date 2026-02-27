@@ -13,7 +13,7 @@ import { NANOBANANA_MODELS } from "./api.js";
  * @returns {Promise<object|null>} The dialog result or null if cancelled
  */
 export async function showPromptDialog(previewBase64, rect) {
-  const currentModel = getSetting("model") || "gemini-2.0-flash-exp";
+  const currentModel = getSetting("model") || "gemini-2.5-flash-image";
 
   const modelOptions = Object.entries(NANOBANANA_MODELS)
     .map(([id, label]) => `<option value="${id}" ${id === currentModel ? "selected" : ""}>${label}</option>`)
