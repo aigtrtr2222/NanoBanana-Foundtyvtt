@@ -16,23 +16,49 @@ A Foundry VTT v13 module that lets you edit maps using **NanoBanana2** (Stable D
   - e.g. `python launch.py --api`
   - Default API URL: `http://127.0.0.1:7860`
 
-## Installation
+## Installation / 설치 방법
 
-### Manual Installation
+### Method 1: Manifest URL (Recommended / 권장)
 
-1. Download or clone this repository into your Foundry VTT `Data/modules/` directory:
-   ```
-   Data/modules/nanobanana-map-editor/
-   ```
-2. Restart Foundry VTT or refresh the module list.
-3. Enable **NanoBanana Map Editor** in your world's module settings.
+In Foundry VTT, go to **Add-on Modules → Install Module**, paste this URL into the **Manifest URL** field at the bottom, and click **Install**:
 
-### Manifest URL
+Foundry VTT에서 **애드온 모듈 → 모듈 설치**로 이동하여 하단의 **Manifest URL** 필드에 아래 URL을 붙여넣고 **설치**를 클릭하세요:
 
-Use this URL in Foundry VTT's "Install Module" dialog:
 ```
 https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt/releases/latest/download/module.json
 ```
+
+### Method 2: Direct Download / 직접 다운로드
+
+1. Go to the [Releases page](https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt/releases/latest) and download **module.zip**.
+
+   [릴리스 페이지](https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt/releases/latest)에서 **module.zip**을 다운로드하세요.
+
+2. Extract it into your Foundry VTT data folder:
+
+   압축을 풀어 Foundry VTT 데이터 폴더에 넣으세요:
+
+   ```
+   Data/modules/nanobanana-map-editor/
+   ```
+3. Restart Foundry VTT, then enable the module in your world settings.
+
+   Foundry VTT를 재시작한 후, 월드 설정에서 모듈을 활성화하세요.
+
+### Creating a Release / 릴리스 생성
+
+To publish a new version, push a git tag:
+
+새 버전을 배포하려면 git 태그를 푸시하세요:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The GitHub Actions workflow will automatically create a release with the `module.json` and `module.zip` files.
+
+GitHub Actions 워크플로우가 자동으로 `module.json`과 `module.zip` 파일이 포함된 릴리스를 생성합니다.
 
 ## Configuration
 
@@ -76,6 +102,8 @@ nanobanana-map-editor/
 ├── lang/
 │   ├── en.json           # English localization
 │   └── ko.json           # Korean (한국어) localization
+├── .github/workflows/
+│   └── release.yml       # Auto-release on tag push
 └── README.md
 ```
 
