@@ -15,7 +15,9 @@ const TOKEN_EXAMPLES_DIR = "nanobanana-map-editor/token-examples";
 export async function loadImageAsBase64(imagePath) {
   if (!imagePath) throw new Error("No image path provided");
 
-  const url = imagePath.startsWith("http") ? imagePath : `/${imagePath}`;
+  const url = imagePath.startsWith("http") || imagePath.startsWith("/")
+    ? imagePath
+    : `/${imagePath}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Failed to load image: ${imagePath}`);
 

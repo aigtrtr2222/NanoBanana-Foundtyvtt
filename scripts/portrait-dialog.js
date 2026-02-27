@@ -33,8 +33,8 @@ export async function showPortraitEditDialog(actor) {
     <form class="nanobanana-dialog nanobanana-portrait-dialog">
       <div class="form-group">
         <div class="preview-container">
-          <img src="${portraitPath}" alt="Portrait"/>
-          <div class="preview-label">${actor.name} - ${game.i18n.localize("NANOBANANA.PortraitLabel")}</div>
+          <img src="${_escapeHtml(portraitPath)}" alt="Portrait"/>
+          <div class="preview-label">${_escapeHtml(actor.name)} - ${game.i18n.localize("NANOBANANA.PortraitLabel")}</div>
         </div>
       </div>
       <div class="form-group">
@@ -116,8 +116,8 @@ export async function showTokenEditDialog(actor) {
     <form class="nanobanana-dialog nanobanana-portrait-dialog">
       <div class="form-group">
         <div class="preview-container">
-          <img src="${tokenPath}" alt="Token"/>
-          <div class="preview-label">${actor.name} - ${game.i18n.localize("NANOBANANA.TokenLabel")}</div>
+          <img src="${_escapeHtml(tokenPath)}" alt="Token"/>
+          <div class="preview-label">${_escapeHtml(actor.name)} - ${game.i18n.localize("NANOBANANA.TokenLabel")}</div>
         </div>
       </div>
       <div class="form-group">
@@ -208,8 +208,8 @@ export async function showTokenGenerateDialog(actor) {
         (ex, idx) => `
         <label class="nanobanana-example-item">
           <input type="checkbox" name="example-${idx}" value="${idx}" checked />
-          <img src="${ex.path}" alt="${ex.name}" title="${ex.name}${ex.prompt ? "\n" + ex.prompt : ""}" />
-          <span class="example-name">${ex.name}</span>
+          <img src="${_escapeHtml(ex.path)}" alt="${_escapeHtml(ex.name)}" title="${_escapeHtml(ex.name)}${ex.prompt ? "\n" + _escapeHtml(ex.prompt) : ""}" />
+          <span class="example-name">${_escapeHtml(ex.name)}</span>
         </label>`
       )
       .join("");
@@ -232,8 +232,8 @@ export async function showTokenGenerateDialog(actor) {
     <form class="nanobanana-dialog nanobanana-portrait-dialog nanobanana-token-gen-dialog">
       <div class="form-group">
         <div class="preview-container">
-          <img src="${portraitPath}" alt="Portrait"/>
-          <div class="preview-label">${actor.name} - ${game.i18n.localize("NANOBANANA.PortraitLabel")}</div>
+          <img src="${_escapeHtml(portraitPath)}" alt="Portrait"/>
+          <div class="preview-label">${_escapeHtml(actor.name)} - ${game.i18n.localize("NANOBANANA.PortraitLabel")}</div>
         </div>
       </div>
       ${examplesHtml}
@@ -331,6 +331,15 @@ export async function showTokenGenerateDialog(actor) {
 /* ------------------------------------------------------------------ */
 /*  Internal Helpers                                                    */
 /* ------------------------------------------------------------------ */
+
+/**
+ * Escape a string for safe insertion into HTML attributes/content.
+ */
+function _escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
 
 /**
  * Extract prompt and model values from a DialogV2 callback reference.
