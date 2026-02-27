@@ -50,22 +50,41 @@ export async function showPromptDialog(previewBase64, rect) {
           label: game.i18n.localize("NANOBANANA.DialogGenerate"),
           icon: "fas fa-magic",
           default: true,
-          callback: (event, button, formData) => {
+          callback: (event, button, dialogRef) => {
             let prompt, model;
 
             // Foundry VTT v13 DialogV2 passes FormDataExtended as 3rd arg
-            if (formData?.object) {
-              prompt = formData.object.prompt;
-              model = formData.object.model;
-            } else if (formData?.querySelector) {
-              // Fallback: older API where 3rd arg is an HTMLElement
-              const form = formData.querySelector("form") ?? formData.closest(".dialog-content")?.querySelector("form");
-              if (!form) { resolve(null); return; }
-              prompt = form.querySelector('[name="prompt"]')?.value;
-              model = form.querySelector('[name="model"]')?.value;
-            } else {
-              resolve(null);
-              return;
+            if (dialogRef?.object) {
+              prompt = dialogRef.object.prompt;
+              model = dialogRef.object.model;
+            } else if (dialogRef?.querySelector) {
+              // Older API where 3rd arg is an HTMLElement
+              const form = dialogRef.querySelector("form") ?? dialogRef.closest?.(".dialog-content")?.querySelector("form");
+              if (form) {
+                prompt = form.querySelector('[name="prompt"]')?.value;
+                model = form.querySelector('[name="model"]')?.value;
+              }
+            } else if (dialogRef?.element) {
+              // Foundry VTT v13: 3rd arg is the DialogV2 instance
+              const el = dialogRef.element;
+              const form = el.querySelector?.("form");
+              if (form) {
+                prompt = form.querySelector('[name="prompt"]')?.value;
+                model = form.querySelector('[name="model"]')?.value;
+              }
+            }
+
+            // DOM fallback: find our dialog form directly in the document
+            if (prompt === undefined || prompt === null) {
+              const forms = document.querySelectorAll(".nanobanana-dialog");
+              for (const f of forms) {
+                const p = f.querySelector('[name="prompt"]')?.value;
+                if (p !== undefined) {
+                  prompt = p;
+                  model = f.querySelector('[name="model"]')?.value;
+                  break;
+                }
+              }
             }
 
             prompt = typeof prompt === "string" ? prompt.trim() : "";
