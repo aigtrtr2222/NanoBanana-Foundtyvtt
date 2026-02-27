@@ -24,5 +24,29 @@
   "NANOBANANA.FlattenCapturing": "Capturing full scene...",
   "NANOBANANA.FlattenSuccess": "Tiles flattened into background successfully!",
   "NANOBANANA.FlattenFailed": "Failed to flatten tiles: {error}",
-  "NANOBANANA.FlattenNoTiles": "No tiles to flatten."
+  "NANOBANANA.FlattenNoTiles": "No tiles to flatten.",
+
+  "NANOBANANA.PortraitEditTitle": "NanoBanana Portrait Edit",
+  "NANOBANANA.PortraitEditBtn": "Edit Portrait",
+  "NANOBANANA.PortraitLabel": "Portrait",
+  "NANOBANANA.PortraitNoImage": "This character has no portrait image to edit.",
+  "NANOBANANA.PortraitPromptPlaceholder": "Describe how you want to modify this portrait...",
+  "NANOBANANA.PortraitGenerating": "Generating portrait with NanoBanana...",
+  "NANOBANANA.PortraitSuccess": "Character portrait updated successfully!",
+
+  "NANOBANANA.TokenEditTitle": "NanoBanana Token Edit",
+  "NANOBANANA.TokenEditBtn": "Edit Token",
+  "NANOBANANA.TokenLabel": "Token",
+  "NANOBANANA.TokenNoImage": "This character has no token image to edit.",
+  "NANOBANANA.TokenPromptPlaceholder": "Describe how you want to modify this token...",
+  "NANOBANANA.TokenGenerating": "Generating token with NanoBanana...",
+  "NANOBANANA.TokenSuccess": "Character token updated successfully!",
+
+  "NANOBANANA.TokenGenerateTitle": "NanoBanana Token Generation",
+  "NANOBANANA.TokenGenerateBtn": "Generate Token",
+  "NANOBANANA.TokenGenScanning": "Scanning token examples folder...",
+  "NANOBANANA.TokenGenExamplesLabel": "Token Style Examples (select to use as reference)",
+  "NANOBANANA.TokenGenNoExamples": "No token examples found. Place example token images in the <code>nanobanana-map-editor/token-examples/</code> folder. You can also add a .txt file with the same name for each example to include a style prompt.",
+  "NANOBANANA.TokenGenPromptPlaceholder": "Describe the token style you want to generate...",
+  "NANOBANANA.TokenGenDefaultPrompt": "Generate a character token from this portrait image. Use the provided example tokens as style references. The token should be circular, with a clear character depiction suitable for use as a virtual tabletop token."
 }

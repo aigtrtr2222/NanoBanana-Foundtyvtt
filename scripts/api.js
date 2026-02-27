@@ -112,6 +112,82 @@ export async function sendImg2Img(imageBase64, options) {
 }
 
 /**
+ * Send a multi-image generation request to the Google Generative AI API.
+ * Used for generating character tokens from a portrait image with reference examples.
+ *
+ * @param {Array<{base64: string, mimeType?: string}>} images - Array of input images
+ * @param {object} options - Generation options
+ * @param {string} options.prompt - The text prompt describing the desired generation
+ * @param {string} [options.model] - Model ID to use
+ * @returns {Promise<string>} Base64-encoded result image
+ */
+export async function sendMultiImageGeneration(images, options) {
+  const apiKey = getSetting("apiKey");
+  if (!apiKey) {
+    throw new Error(game.i18n.localize("NANOBANANA.ErrorNoApi"));
+  }
+
+  const model = options.model || getSetting("model") || "gemini-2.5-flash-image";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const parts = [];
+  for (const img of images) {
+    parts.push({
+      inlineData: {
+        mimeType: img.mimeType || "image/png",
+        data: img.base64,
+      },
+    });
+  }
+  parts.push({ text: options.prompt || "" });
+
+  const payload = {
+    contents: [{ parts }],
+    generationConfig: {
+      responseModalities: ["TEXT", "IMAGE"],
+    },
+  };
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      game.i18n.format("NANOBANANA.ErrorApiFailed", { error: errorText })
+    );
+  }
+
+  const result = await response.json();
+  const candidates = result.candidates;
+  if (!candidates || candidates.length === 0) {
+    throw new Error(
+      game.i18n.format("NANOBANANA.ErrorApiFailed", { error: "No candidates returned" })
+    );
+  }
+
+  const resultParts = candidates[0]?.content?.parts;
+  if (!resultParts) {
+    throw new Error(
+      game.i18n.format("NANOBANANA.ErrorApiFailed", { error: "No content parts returned" })
+    );
+  }
+
+  for (const part of resultParts) {
+    if (part.inlineData?.data) {
+      return part.inlineData.data;
+    }
+  }
+
+  throw new Error(
+    game.i18n.format("NANOBANANA.ErrorApiFailed", { error: "No image returned in response" })
+  );
+}
+
+/**
  * Check if the Google Generative AI API is reachable with the configured key.
  * @returns {Promise<boolean>}
  */

@@ -16,6 +16,11 @@ import { sendImg2Img } from "./api.js";
 import { showPromptDialog } from "./dialog.js";
 import { placeTile } from "./tile.js";
 import { flattenTiles } from "./flatten.js";
+import {
+  showPortraitEditDialog,
+  showTokenEditDialog,
+  showTokenGenerateDialog,
+} from "./portrait-dialog.js";
 
 const MODULE_ID = "nanobanana-map-editor";
 
@@ -331,6 +336,69 @@ Hooks.on("getSceneControlButtons", (controls) => {
     tileControls.tools[nanobananaTool.name] = nanobananaTool;
     tileControls.tools[flattenTool.name] = flattenTool;
   }
+});
+
+/* ------------------------------------------------------------------ */
+/*  Character Sheet – Portrait/Token Buttons                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Inject NanoBanana portrait/token editing buttons above the character
+ * sheet tabs.
+ */
+function _injectPortraitButtons(sheet, html) {
+  const actor = sheet.actor ?? sheet.document;
+  if (!actor || !(actor instanceof Actor)) return;
+
+  const element = html instanceof HTMLElement ? html : html?.[0] ?? html;
+  if (!element?.querySelector) return;
+
+  // Prevent double-injection
+  if (element.querySelector(".nanobanana-portrait-buttons")) return;
+
+  // Find tab navigation – try several selectors used by common systems
+  const tabs =
+    element.querySelector("nav.sheet-tabs") ??
+    element.querySelector(".sheet-tabs") ??
+    element.querySelector(".tabs[data-group]") ??
+    element.querySelector(".tabs");
+  if (!tabs) return;
+
+  // Build button bar
+  const bar = document.createElement("div");
+  bar.className = "nanobanana-portrait-buttons";
+  bar.innerHTML = `
+    <button type="button" class="nanobanana-portrait-btn" data-action="edit-portrait" title="${game.i18n.localize("NANOBANANA.PortraitEditTitle")}">
+      <i class="fas fa-wand-magic-sparkles"></i> ${game.i18n.localize("NANOBANANA.PortraitEditBtn")}
+    </button>
+    <button type="button" class="nanobanana-portrait-btn" data-action="edit-token" title="${game.i18n.localize("NANOBANANA.TokenEditTitle")}">
+      <i class="fas fa-wand-magic-sparkles"></i> ${game.i18n.localize("NANOBANANA.TokenEditBtn")}
+    </button>
+    <button type="button" class="nanobanana-portrait-btn" data-action="generate-token" title="${game.i18n.localize("NANOBANANA.TokenGenerateTitle")}">
+      <i class="fas fa-magic"></i> ${game.i18n.localize("NANOBANANA.TokenGenerateBtn")}
+    </button>
+  `;
+
+  tabs.parentNode.insertBefore(bar, tabs);
+
+  // Wire up click handlers
+  bar.querySelector('[data-action="edit-portrait"]').addEventListener("click", (ev) => {
+    ev.preventDefault();
+    showPortraitEditDialog(actor);
+  });
+  bar.querySelector('[data-action="edit-token"]').addEventListener("click", (ev) => {
+    ev.preventDefault();
+    showTokenEditDialog(actor);
+  });
+  bar.querySelector('[data-action="generate-token"]').addEventListener("click", (ev) => {
+    ev.preventDefault();
+    showTokenGenerateDialog(actor);
+  });
+}
+
+// Inject buttons for both Application v1 and v2 actor sheets
+Hooks.on("renderActorSheet", (sheet, html) => {
+  _injectPortraitButtons(sheet, html);
 });
 
 Hooks.once("ready", () => {
