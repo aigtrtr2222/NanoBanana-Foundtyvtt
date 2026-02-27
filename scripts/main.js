@@ -356,13 +356,13 @@ function _injectPortraitButtons(sheet, html) {
   // Prevent double-injection
   if (element.querySelector(".nanobanana-portrait-buttons")) return;
 
-  // Find tab navigation – try several selectors used by common systems
+  // Find tab navigation – try several selectors used by common systems (v1 & v2)
   const tabs =
     element.querySelector("nav.sheet-tabs") ??
     element.querySelector(".sheet-tabs") ??
+    element.querySelector("nav.sheet-navigation") ??
     element.querySelector(".tabs[data-group]") ??
     element.querySelector(".tabs");
-  if (!tabs) return;
 
   // Build button bar
   const bar = document.createElement("div");
@@ -379,7 +379,20 @@ function _injectPortraitButtons(sheet, html) {
     </button>
   `;
 
-  tabs.parentNode.insertBefore(bar, tabs);
+  if (tabs) {
+    tabs.parentNode.insertBefore(bar, tabs);
+  } else {
+    // Fallback: insert at the top of the sheet body or header for v2 sheets
+    // that may not use a traditional tab navigation structure
+    const body =
+      element.querySelector(".sheet-body") ??
+      element.querySelector(".window-content");
+    if (body) {
+      body.prepend(bar);
+    } else {
+      return;
+    }
+  }
 
   // Wire up click handlers
   bar.querySelector('[data-action="edit-portrait"]').addEventListener("click", (ev) => {
@@ -398,6 +411,9 @@ function _injectPortraitButtons(sheet, html) {
 
 // Inject buttons for both Application v1 and v2 actor sheets
 Hooks.on("renderActorSheet", (sheet, html) => {
+  _injectPortraitButtons(sheet, html);
+});
+Hooks.on("renderActorSheetV2", (sheet, html) => {
   _injectPortraitButtons(sheet, html);
 });
 
