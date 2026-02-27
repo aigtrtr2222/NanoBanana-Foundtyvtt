@@ -111,6 +111,8 @@ export async function scanTokenExamples() {
     const result = await FP.browse("data", TOKEN_EXAMPLES_DIR);
     if (!result?.files?.length) return [];
 
+    const allFiles = new Set(result.files);
+
     const imageFiles = result.files.filter((f) =>
       /\.(png|jpg|jpeg|webp)$/i.test(f)
     );
@@ -119,16 +121,18 @@ export async function scanTokenExamples() {
     for (const imgPath of imageFiles) {
       const name = imgPath.split("/").pop().replace(/\.[^.]+$/, "");
 
-      // Try to load a companion prompt .txt file
+      // Only fetch the companion .txt file if it exists in the directory listing
       const promptPath = imgPath.replace(/\.[^.]+$/, ".txt");
       let prompt = "";
-      try {
-        const promptResponse = await fetch(`/${promptPath}`);
-        if (promptResponse.ok) {
-          prompt = await promptResponse.text();
+      if (allFiles.has(promptPath)) {
+        try {
+          const promptResponse = await fetch(`/${promptPath}`);
+          if (promptResponse.ok) {
+            prompt = await promptResponse.text();
+          }
+        } catch {
+          // No prompt file available
         }
-      } catch {
-        // No prompt file available
       }
 
       examples.push({ path: imgPath, name, prompt: prompt.trim() });
@@ -137,4 +141,39 @@ export async function scanTokenExamples() {
   } catch {
     return [];
   }
+}
+
+/**
+ * Remove white/near-white background from a base64 image, making it transparent.
+ * Uses canvas-based pixel manipulation.
+ * @param {string} imageBase64 - Base64-encoded image (without data URI prefix)
+ * @param {number} [threshold=240] - Brightness threshold (0–255). Pixels with R, G, and B all above this value are made transparent.
+ * @returns {Promise<string>} Base64-encoded PNG image with transparent background
+ */
+export async function removeWhiteBackground(imageBase64, threshold = 240) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] >= threshold && data[i + 1] >= threshold && data[i + 2] >= threshold) {
+          data[i + 3] = 0; // Set alpha to 0 (transparent)
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+
+      const resultDataUrl = canvas.toDataURL("image/png");
+      const resultBase64 = resultDataUrl.replace(/^data:image\/png;base64,/, "");
+      resolve(resultBase64);
+    };
+    img.onerror = () => reject(new Error("Failed to load image for background removal: invalid image data"));
+    img.src = `data:image/png;base64,${imageBase64}`;
+  });
 }
