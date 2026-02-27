@@ -11,6 +11,7 @@ import {
   updateActorPortrait,
   updateActorToken,
   scanTokenExamples,
+  removeWhiteBackground,
 } from "./portrait.js";
 
 /**
@@ -245,6 +246,12 @@ export async function showTokenGenerateDialog(actor) {
         <label>${game.i18n.localize("NANOBANANA.DialogPromptLabel")}</label>
         <textarea name="prompt" placeholder="${game.i18n.localize("NANOBANANA.TokenGenPromptPlaceholder")}">${game.i18n.localize("NANOBANANA.TokenGenDefaultPrompt")}</textarea>
       </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="removeBackground" checked />
+          ${game.i18n.localize("NANOBANANA.TokenGenRemoveBg")}
+        </label>
+      </div>
     </form>
   `;
 
@@ -269,6 +276,7 @@ export async function showTokenGenerateDialog(actor) {
             try {
               // Collect selected examples
               const selectedExamples = _getSelectedExamples(dialogRef, examples);
+              const shouldRemoveBg = _getCheckboxValue(dialogRef, "removeBackground");
 
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenGenerating"));
 
@@ -300,6 +308,11 @@ export async function showTokenGenerateDialog(actor) {
               } else {
                 // No examples selected; use portrait-only generation
                 resultBase64 = await sendImg2Img(portraitBase64, { prompt, model });
+              }
+
+              // Remove white background if requested
+              if (shouldRemoveBg) {
+                resultBase64 = await removeWhiteBackground(resultBase64);
               }
 
               const newPath = await uploadImage(resultBase64, "nanobanana-token-gen");
@@ -411,4 +424,26 @@ function _getSelectedExamples(dialogRef, examples) {
     }
   }
   return selected;
+}
+
+/**
+ * Get the value of a named checkbox from a DialogV2 callback reference.
+ */
+function _getCheckboxValue(dialogRef, name) {
+  let formEl;
+
+  if (dialogRef?.element) {
+    formEl = dialogRef.element.querySelector?.("form");
+  } else if (dialogRef?.querySelector) {
+    formEl = dialogRef.querySelector("form");
+  }
+
+  // DOM fallback
+  if (!formEl) {
+    formEl = document.querySelector(".nanobanana-token-gen-dialog");
+  }
+
+  if (!formEl) return false;
+  const checkbox = formEl.querySelector(`[name="${name}"]`);
+  return checkbox ? checkbox.checked : false;
 }

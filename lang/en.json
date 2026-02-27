@@ -48,5 +48,6 @@
   "NANOBANANA.TokenGenExamplesLabel": "Token Style Examples (select to use as reference)",
   "NANOBANANA.TokenGenNoExamples": "No token examples found. Place example token images in the <code>nanobanana-map-editor/token-examples/</code> folder. You can also add a .txt file with the same name for each example to include a style prompt.",
   "NANOBANANA.TokenGenPromptPlaceholder": "Describe the token style you want to generate...",
-  "NANOBANANA.TokenGenDefaultPrompt": "Generate a character token from this portrait image. Use the provided example tokens as style references. The token should be circular, with a clear character depiction suitable for use as a virtual tabletop token."
+  "NANOBANANA.TokenGenDefaultPrompt": "Generate a character token from this portrait image. Use the provided example tokens as style references. The token should be circular, with a clear character depiction suitable for use as a virtual tabletop token.",
+  "NANOBANANA.TokenGenRemoveBg": "Remove white background (make transparent)"
 }
