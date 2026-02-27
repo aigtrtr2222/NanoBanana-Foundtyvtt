@@ -23,6 +23,15 @@ export async function captureCanvasRegion(rect) {
   const w = Math.round(rect.width);
   const h = Math.round(rect.height);
 
+  // Force a fresh render so the canvas element contains up-to-date pixel data.
+  // Without this, the WebGL/WebGPU drawing buffer may hold stale content
+  // (e.g. only the grid) when preserveDrawingBuffer is false.
+  try {
+    renderer.render({ container: stage });
+  } catch {
+    try { renderer.render(stage); } catch (e) { console.debug("nanobanana-map-editor | forced render failed", e); }
+  }
+
   // --- Primary method: draw from the renderer's visible canvas element ---
   const view = renderer.view ?? renderer.canvas;
   if (view) {

@@ -50,13 +50,25 @@ export async function showPromptDialog(previewBase64, rect) {
           label: game.i18n.localize("NANOBANANA.DialogGenerate"),
           icon: "fas fa-magic",
           default: true,
-          callback: (event, button, html) => {
-            const form = html.querySelector("form") ?? html.closest(".dialog-content")?.querySelector("form");
-            if (!form) {
+          callback: (event, button, formData) => {
+            let prompt, model;
+
+            // Foundry VTT v13 DialogV2 passes FormDataExtended as 3rd arg
+            if (formData?.object) {
+              prompt = formData.object.prompt;
+              model = formData.object.model;
+            } else if (formData?.querySelector) {
+              // Fallback: older API where 3rd arg is an HTMLElement
+              const form = formData.querySelector("form") ?? formData.closest(".dialog-content")?.querySelector("form");
+              if (!form) { resolve(null); return; }
+              prompt = form.querySelector('[name="prompt"]')?.value;
+              model = form.querySelector('[name="model"]')?.value;
+            } else {
               resolve(null);
               return;
             }
-            const prompt = form.querySelector('[name="prompt"]')?.value?.trim();
+
+            prompt = typeof prompt === "string" ? prompt.trim() : "";
             if (!prompt) {
               ui.notifications.warn(game.i18n.localize("NANOBANANA.ErrorNoPrompt"));
               resolve(null);
@@ -64,7 +76,7 @@ export async function showPromptDialog(previewBase64, rect) {
             }
             resolve({
               prompt,
-              model: form.querySelector('[name="model"]')?.value || currentModel,
+              model: model || currentModel,
             });
           },
         },
