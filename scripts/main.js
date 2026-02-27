@@ -15,6 +15,7 @@ import { captureCanvasRegion } from "./capture.js";
 import { sendImg2Img } from "./api.js";
 import { showPromptDialog } from "./dialog.js";
 import { placeTile } from "./tile.js";
+import { flattenTiles } from "./flatten.js";
 
 const MODULE_ID = "nanobanana-map-editor";
 
@@ -310,11 +311,25 @@ Hooks.on("getSceneControlButtons", (controls) => {
     },
   };
 
+  const flattenTool = {
+    name: "nanobanana-flatten",
+    title: game.i18n.localize("NANOBANANA.FlattenTitle"),
+    icon: "fas fa-layer-group",
+    visible: true,
+    toggle: false,
+    button: true,
+    onChange: () => {
+      flattenTiles();
+    },
+  };
+
   // In Foundry VTT v13, tools may be an object keyed by name instead of an array
   if (Array.isArray(tileControls.tools)) {
     tileControls.tools.push(nanobananaTool);
+    tileControls.tools.push(flattenTool);
   } else {
     tileControls.tools[nanobananaTool.name] = nanobananaTool;
+    tileControls.tools[flattenTool.name] = flattenTool;
   }
 });
 

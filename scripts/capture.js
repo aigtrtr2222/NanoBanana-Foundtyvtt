@@ -9,6 +9,22 @@
  */
 
 /**
+ * Capture the full scene canvas as a base64 PNG string.
+ * Delegates to captureCanvasRegion using the full scene dimensions.
+ *
+ * @returns {Promise<string>} Base64-encoded PNG image (without data URI prefix)
+ */
+export async function captureFullScene() {
+  const d = canvas.dimensions;
+  return captureCanvasRegion({
+    x: d.sceneX,
+    y: d.sceneY,
+    width: d.sceneWidth,
+    height: d.sceneHeight,
+  });
+}
+
+/**
  * Capture a rectangular region of the canvas as a base64 PNG string.
  * Temporarily reconfigures the renderer to avoid culling, renders each
  * visible layer into an offscreen RenderTexture, then restores the

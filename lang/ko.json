@@ -17,5 +17,12 @@
   "NANOBANANA.ErrorApiFailed": "Google AI API 통신 실패: {error}",
   "NANOBANANA.ErrorNoScene": "활성화된 씬을 찾을 수 없습니다.",
   "NANOBANANA.ErrorNoPrompt": "프롬프트를 입력해주세요.",
-  "NANOBANANA.ErrorCaptureFailed": "선택한 영역을 캡처하는데 실패했습니다."
+  "NANOBANANA.ErrorCaptureFailed": "선택한 영역을 캡처하는데 실패했습니다.",
+  "NANOBANANA.FlattenTitle": "타일을 배경으로 병합",
+  "NANOBANANA.FlattenConfirm": "전체 맵을 캡처하고, 배경 이미지를 교체한 후, {count}개의 타일을 모두 제거합니다. 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?",
+  "NANOBANANA.FlattenExecute": "병합",
+  "NANOBANANA.FlattenCapturing": "전체 씬을 캡처하는 중...",
+  "NANOBANANA.FlattenSuccess": "타일이 배경으로 성공적으로 병합되었습니다!",
+  "NANOBANANA.FlattenFailed": "타일 병합 실패: {error}",
+  "NANOBANANA.FlattenNoTiles": "병합할 타일이 없습니다."
 }
