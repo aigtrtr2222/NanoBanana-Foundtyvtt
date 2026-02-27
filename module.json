@@ -1,7 +1,7 @@
 {
   "id": "nanobanana-map-editor",
   "title": "NanoBanana Map Editor",
-  "description": "Edit maps using NanoBanana (Google Generative AI) image generation. Capture a region of the map, provide a prompt, and the AI-modified image is placed as a tile.",
+  "description": "Edit maps, character portraits, and tokens using NanoBanana (Google Generative AI) image generation. Capture a region of the map, provide a prompt, and the AI-modified image is placed as a tile. Also edit character portraits and tokens directly from the character sheet, or generate tokens from portrait images using style examples.",
   "version": "1.0.0",
   "compatibility": {
     "minimum": "13",
