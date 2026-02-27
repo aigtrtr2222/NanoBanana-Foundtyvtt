@@ -24,5 +24,29 @@
   "NANOBANANA.FlattenCapturing": "전체 씬을 캡처하는 중...",
   "NANOBANANA.FlattenSuccess": "타일이 배경으로 성공적으로 병합되었습니다!",
   "NANOBANANA.FlattenFailed": "타일 병합 실패: {error}",
-  "NANOBANANA.FlattenNoTiles": "병합할 타일이 없습니다."
+  "NANOBANANA.FlattenNoTiles": "병합할 타일이 없습니다.",
+
+  "NANOBANANA.PortraitEditTitle": "나노바나나 포트레잇 편집",
+  "NANOBANANA.PortraitEditBtn": "포트레잇 편집",
+  "NANOBANANA.PortraitLabel": "포트레잇",
+  "NANOBANANA.PortraitNoImage": "편집할 캐릭터 포트레잇 이미지가 없습니다.",
+  "NANOBANANA.PortraitPromptPlaceholder": "포트레잇을 어떻게 수정할지 설명하세요...",
+  "NANOBANANA.PortraitGenerating": "나노바나나로 포트레잇을 생성하는 중...",
+  "NANOBANANA.PortraitSuccess": "캐릭터 포트레잇이 성공적으로 업데이트되었습니다!",
+
+  "NANOBANANA.TokenEditTitle": "나노바나나 토큰 편집",
+  "NANOBANANA.TokenEditBtn": "토큰 편집",
+  "NANOBANANA.TokenLabel": "토큰",
+  "NANOBANANA.TokenNoImage": "편집할 캐릭터 토큰 이미지가 없습니다.",
+  "NANOBANANA.TokenPromptPlaceholder": "토큰을 어떻게 수정할지 설명하세요...",
+  "NANOBANANA.TokenGenerating": "나노바나나로 토큰을 생성하는 중...",
+  "NANOBANANA.TokenSuccess": "캐릭터 토큰이 성공적으로 업데이트되었습니다!",
+
+  "NANOBANANA.TokenGenerateTitle": "나노바나나 토큰 생성",
+  "NANOBANANA.TokenGenerateBtn": "토큰 생성",
+  "NANOBANANA.TokenGenScanning": "토큰 예시 폴더를 스캔하는 중...",
+  "NANOBANANA.TokenGenExamplesLabel": "토큰 스타일 예시 (참조할 예시를 선택하세요)",
+  "NANOBANANA.TokenGenNoExamples": "토큰 예시를 찾을 수 없습니다. <code>nanobanana-map-editor/token-examples/</code> 폴더에 예시 토큰 이미지를 넣어주세요. 각 예시와 같은 이름의 .txt 파일을 추가하면 스타일 프롬프트를 포함할 수 있습니다.",
+  "NANOBANANA.TokenGenPromptPlaceholder": "생성할 토큰 스타일을 설명하세요...",
+  "NANOBANANA.TokenGenDefaultPrompt": "이 포트레잇 이미지로부터 캐릭터 토큰을 생성해주세요. 제공된 예시 토큰을 스타일 참조로 사용하세요. 토큰은 원형이어야 하며, 가상 탁상 토큰으로 사용하기에 적합한 명확한 캐릭터 묘사여야 합니다."
 }
