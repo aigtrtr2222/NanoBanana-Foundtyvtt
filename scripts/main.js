@@ -204,15 +204,19 @@ Hooks.once("init", () => {
 });
 
 Hooks.on("getSceneControlButtons", (controls) => {
-  const tileControls = controls.find((c) => c.name === "tiles");
+  // In Foundry VTT v13, controls may be an object keyed by name instead of an array
+  const controlList = Array.isArray(controls) ? controls : Object.values(controls);
+  const tileControls = controlList.find((c) => c.name === "tiles");
   if (!tileControls) return;
 
-  tileControls.tools.push({
+  const nanobananaTool = {
     name: "nanobanana-capture",
     title: game.i18n.localize("NANOBANANA.ToolTitle"),
     icon: "fas fa-wand-magic-sparkles",
+    visible: true,
+    toggle: false,
     button: true,
-    onClick: () => {
+    onChange: () => {
       if (selectionLayer?._active) {
         selectionLayer.deactivate();
         selectionLayer = null;
@@ -224,7 +228,14 @@ Hooks.on("getSceneControlButtons", (controls) => {
         game.i18n.localize("NANOBANANA.ToolHint")
       );
     },
-  });
+  };
+
+  // In Foundry VTT v13, tools may be an object keyed by name instead of an array
+  if (Array.isArray(tileControls.tools)) {
+    tileControls.tools.push(nanobananaTool);
+  } else {
+    tileControls.tools[nanobananaTool.name] = nanobananaTool;
+  }
 });
 
 Hooks.once("ready", () => {
