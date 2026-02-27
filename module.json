@@ -1,0 +1,37 @@
+{
+  "id": "nanobanana-map-editor",
+  "title": "NanoBanana Map Editor",
+  "description": "나노바나나2 AI를 이용한 FoundryVTT 맵 편집 모듈. 맵의 일부를 드래그로 캡처하고 AI 프롬프트로 수정한 뒤 타일로 배치합니다. / FoundryVTT map editing module using NanoBanana2 AI. Drag-capture a map region, edit it with an AI prompt, and place the result as a tile.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "NanoBanana",
+      "url": "https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/nanobanana.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "ko",
+      "name": "한국어",
+      "path": "lang/ko.json"
+    }
+  ],
+  "url": "https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt",
+  "manifest": "https://raw.githubusercontent.com/aigtrtr2222/NanoBanana-Foundtyvtt/main/module.json",
+  "download": "https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt/releases/latest/download/module.zip"
+}

@@ -1,0 +1,37 @@
+{
+  "NANOBANANA": {
+    "CaptureRegion": "Capture & Edit Region (NanoBanana)",
+
+    "DialogTitle":         "NanoBanana Map Editor",
+    "PromptLabel":         "Editing Prompt",
+    "PromptPlaceholder":   "e.g. Add a burning fireplace in the corner",
+    "Edit":                "Edit with AI",
+    "Cancel":              "Cancel",
+
+    "Processing": "NanoBanana: Sending to AI, please wait…",
+    "Success":    "NanoBanana: Tile placed successfully!",
+    "Error":      "NanoBanana: Error",
+
+    "Settings": {
+      "ApiUrl":            "NanoBanana2 API URL",
+      "ApiUrlHint":        "Base URL of the NanoBanana2 server (e.g. http://localhost:7860). The module will POST to <url>/edit.",
+      "ApiKey":            "NanoBanana2 API Key",
+      "ApiKeyHint":        "Optional Bearer token / API key. Leave blank if your server does not require authentication.",
+      "UploadFolder":      "Upload Folder",
+      "UploadFolderHint":  "Folder inside the FoundryVTT data directory where edited images are saved (default: nanobanana-edits)."
+    },
+
+    "Keybinding": {
+      "ToggleCapture":     "Toggle NanaBanana Capture Mode",
+      "ToggleCaptureHint": "Activate or deactivate the drag-to-capture overlay (default: Alt+M)."
+    },
+
+    "Errors": {
+      "NetworkError":       "Cannot connect to NanoBanana2 server ({endpoint}): {message}",
+      "ApiError":           "NanoBanana2 API error {status} {statusText}. {detail}",
+      "InvalidJson":        "NanoBanana2 API returned an invalid JSON response.",
+      "NoImageInResponse":  "No image data in the NanoBanana2 response. Received keys: [{keys}]",
+      "UploadFailed":       "File upload failed. Check that the FoundryVTT data folder is writable."
+    }
+  }
+}
