@@ -12,6 +12,7 @@ import {
   updateActorToken,
   scanTokenExamples,
 } from "./portrait.js";
+import { removeWhiteBackground } from "./background-removal.js";
 
 /**
  * Show a dialog for editing a character's portrait with AI.
@@ -45,6 +46,13 @@ export async function showPortraitEditDialog(actor) {
         <label>${game.i18n.localize("NANOBANANA.DialogPromptLabel")}</label>
         <textarea name="prompt" placeholder="${game.i18n.localize("NANOBANANA.PortraitPromptPlaceholder")}"></textarea>
       </div>
+      <div class="form-group">
+        <label class="checkbox">
+          <input type="checkbox" name="removeBackground" />
+          ${game.i18n.localize("NANOBANANA.RemoveBackgroundLabel")}
+        </label>
+        <p class="notes">${game.i18n.localize("NANOBANANA.RemoveBackgroundHint")}</p>
+      </div>
     </form>
   `;
 
@@ -59,7 +67,7 @@ export async function showPortraitEditDialog(actor) {
           icon: "fas fa-magic",
           default: true,
           callback: async (event, button, dialogRef) => {
-            const { prompt, model } = _extractFormData(dialogRef, currentModel);
+            const { prompt, model, removeBackground } = _extractFormData(dialogRef, currentModel);
             if (!prompt) {
               ui.notifications.warn(game.i18n.localize("NANOBANANA.ErrorNoPrompt"));
               resolve(null);
@@ -69,7 +77,10 @@ export async function showPortraitEditDialog(actor) {
             try {
               ui.notifications.info(game.i18n.localize("NANOBANANA.PortraitGenerating"));
               const portraitBase64 = await loadImageAsBase64(portraitPath);
-              const resultBase64 = await sendImg2Img(portraitBase64, { prompt, model });
+              let resultBase64 = await sendImg2Img(portraitBase64, { prompt, model });
+              if (removeBackground) {
+                resultBase64 = await removeWhiteBackground(resultBase64);
+              }
               const newPath = await uploadImage(resultBase64, "nanobanana-portrait");
               await updateActorPortrait(actor, newPath);
               ui.notifications.info(game.i18n.localize("NANOBANANA.PortraitSuccess"));
@@ -128,6 +139,13 @@ export async function showTokenEditDialog(actor) {
         <label>${game.i18n.localize("NANOBANANA.DialogPromptLabel")}</label>
         <textarea name="prompt" placeholder="${game.i18n.localize("NANOBANANA.TokenPromptPlaceholder")}"></textarea>
       </div>
+      <div class="form-group">
+        <label class="checkbox">
+          <input type="checkbox" name="removeBackground" />
+          ${game.i18n.localize("NANOBANANA.RemoveBackgroundLabel")}
+        </label>
+        <p class="notes">${game.i18n.localize("NANOBANANA.RemoveBackgroundHint")}</p>
+      </div>
     </form>
   `;
 
@@ -142,7 +160,7 @@ export async function showTokenEditDialog(actor) {
           icon: "fas fa-magic",
           default: true,
           callback: async (event, button, dialogRef) => {
-            const { prompt, model } = _extractFormData(dialogRef, currentModel);
+            const { prompt, model, removeBackground } = _extractFormData(dialogRef, currentModel);
             if (!prompt) {
               ui.notifications.warn(game.i18n.localize("NANOBANANA.ErrorNoPrompt"));
               resolve(null);
@@ -152,7 +170,10 @@ export async function showTokenEditDialog(actor) {
             try {
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenGenerating"));
               const tokenBase64 = await loadImageAsBase64(tokenPath);
-              const resultBase64 = await sendImg2Img(tokenBase64, { prompt, model });
+              let resultBase64 = await sendImg2Img(tokenBase64, { prompt, model });
+              if (removeBackground) {
+                resultBase64 = await removeWhiteBackground(resultBase64);
+              }
               const newPath = await uploadImage(resultBase64, "nanobanana-token");
               await updateActorToken(actor, newPath);
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenSuccess"));
@@ -245,6 +266,13 @@ export async function showTokenGenerateDialog(actor) {
         <label>${game.i18n.localize("NANOBANANA.DialogPromptLabel")}</label>
         <textarea name="prompt" placeholder="${game.i18n.localize("NANOBANANA.TokenGenPromptPlaceholder")}">${game.i18n.localize("NANOBANANA.TokenGenDefaultPrompt")}</textarea>
       </div>
+      <div class="form-group">
+        <label class="checkbox">
+          <input type="checkbox" name="removeBackground" checked />
+          ${game.i18n.localize("NANOBANANA.RemoveBackgroundLabel")}
+        </label>
+        <p class="notes">${game.i18n.localize("NANOBANANA.RemoveBackgroundHint")}</p>
+      </div>
     </form>
   `;
 
@@ -259,7 +287,7 @@ export async function showTokenGenerateDialog(actor) {
           icon: "fas fa-magic",
           default: true,
           callback: async (event, button, dialogRef) => {
-            const { prompt, model } = _extractFormData(dialogRef, currentModel);
+            const { prompt, model, removeBackground } = _extractFormData(dialogRef, currentModel);
             if (!prompt) {
               ui.notifications.warn(game.i18n.localize("NANOBANANA.ErrorNoPrompt"));
               resolve(null);
@@ -302,7 +330,10 @@ export async function showTokenGenerateDialog(actor) {
                 resultBase64 = await sendImg2Img(portraitBase64, { prompt, model });
               }
 
-              const newPath = await uploadImage(resultBase64, "nanobanana-token-gen");
+              const newPath = await uploadImage(
+                removeBackground ? await removeWhiteBackground(resultBase64) : resultBase64,
+                "nanobanana-token-gen"
+              );
               await updateActorToken(actor, newPath);
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenSuccess"));
               resolve(newPath);
@@ -342,20 +373,22 @@ function _escapeHtml(str) {
 }
 
 /**
- * Extract prompt and model values from a DialogV2 callback reference.
+ * Extract prompt, model, and removeBackground values from a DialogV2 callback reference.
  * Handles multiple Foundry VTT v13 DialogV2 callback signatures.
  */
 function _extractFormData(dialogRef, fallbackModel) {
-  let prompt, model;
+  let prompt, model, removeBackground;
 
   if (dialogRef?.object) {
     prompt = dialogRef.object.prompt;
     model = dialogRef.object.model;
+    removeBackground = dialogRef.object.removeBackground;
   } else if (dialogRef?.querySelector) {
     const form = dialogRef.querySelector("form") ?? dialogRef.closest?.(".dialog-content")?.querySelector("form");
     if (form) {
       prompt = form.querySelector('[name="prompt"]')?.value;
       model = form.querySelector('[name="model"]')?.value;
+      removeBackground = form.querySelector('[name="removeBackground"]')?.checked;
     }
   } else if (dialogRef?.element) {
     const el = dialogRef.element;
@@ -363,6 +396,7 @@ function _extractFormData(dialogRef, fallbackModel) {
     if (form) {
       prompt = form.querySelector('[name="prompt"]')?.value;
       model = form.querySelector('[name="model"]')?.value;
+      removeBackground = form.querySelector('[name="removeBackground"]')?.checked;
     }
   }
 
@@ -374,6 +408,7 @@ function _extractFormData(dialogRef, fallbackModel) {
       if (p !== undefined) {
         prompt = p;
         model = f.querySelector('[name="model"]')?.value;
+        removeBackground = f.querySelector('[name="removeBackground"]')?.checked;
         break;
       }
     }
@@ -381,7 +416,8 @@ function _extractFormData(dialogRef, fallbackModel) {
 
   prompt = typeof prompt === "string" ? prompt.trim() : "";
   model = model || fallbackModel;
-  return { prompt, model };
+  removeBackground = !!removeBackground;
+  return { prompt, model, removeBackground };
 }
 
 /**
