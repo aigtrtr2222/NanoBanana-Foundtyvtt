@@ -1,14 +1,18 @@
 /**
  * NanoBanana Map Editor - Canvas Region Capture
  * Captures a rectangular region of the canvas as a base64-encoded image.
+ *
+ * Uses the renderer-resize approach: temporarily resizes the renderer to
+ * match the capture region, pans to center on the selected area at 1:1
+ * scale, then renders individual canvas layers into a RenderTexture.
+ * This avoids culling issues and correctly captures all visible elements.
  */
 
 /**
  * Capture a rectangular region of the canvas as a base64 PNG string.
- * Uses canvas readback as the primary method (preserves FoundryVTT's full
- * rendering pipeline including background, lighting, and effects), with a
- * PIXI RenderTexture fallback for backends where canvas readback is
- * unavailable (e.g. WebGPU).
+ * Temporarily reconfigures the renderer to avoid culling, renders each
+ * visible layer into an offscreen RenderTexture, then restores the
+ * original viewport.
  *
  * @param {object} rect - The rectangle to capture in scene coordinates
  * @param {number} rect.x - Left edge in scene coordinates
@@ -19,93 +23,89 @@
  */
 export async function captureCanvasRegion(rect) {
   const renderer = canvas.app.renderer;
-  const stage = canvas.stage;
 
   const w = Math.round(rect.width);
   const h = Math.round(rect.height);
 
-  // Compute the current stage transform so we can map scene coordinates to
-  // screen-pixel coordinates on the rendered canvas.
-  const scaleX = stage.scale.x;
-  const scaleY = stage.scale.y;
-  const offsetX = stage.position.x;
-  const offsetY = stage.position.y;
+  // Save original state for restoration
+  const oldView = { ...canvas.scene._viewPosition };
+  const oldRes = renderer.resolution;
 
-  // Account for renderer resolution (e.g., high-DPI / Retina displays).
-  const resolution = renderer.resolution ?? window.devicePixelRatio ?? 1;
+  // Temporarily resize the renderer to the capture region so that the
+  // entire area is rendered without viewport culling.
+  renderer.resolution = 1;
+  renderer.resize(w, h);
+  canvas.screenDimensions[0] = w;
+  canvas.screenDimensions[1] = h;
 
-  // Convert scene coordinates to canvas pixel coordinates
-  const srcX = Math.round((rect.x * scaleX + offsetX) * resolution);
-  const srcY = Math.round((rect.y * scaleY + offsetY) * resolution);
-  const srcW = Math.round(rect.width * scaleX * resolution);
-  const srcH = Math.round(rect.height * scaleY * resolution);
+  // Center the view on the selected region at 1:1 scale
+  const centerX = rect.x + w / 2;
+  const centerY = rect.y + h / 2;
+  canvas.stage.position.set(w / 2, h / 2);
+  canvas.pan({ x: centerX, y: centerY, scale: 1 });
 
-  // --- Primary method: canvas readback ---
-  // Force a full render through FoundryVTT's normal pipeline so that all
-  // layers (background, tokens, lighting, etc.) are composited correctly,
-  // then crop the desired region from the canvas element.
+  // Force a full transform update so every display object has the correct
+  // world transform before we render individual layers.
+  const cacheParent = canvas.stage.enableTempParent();
+  canvas.stage.updateTransform();
+  canvas.stage.disableTempParent(cacheParent);
+
+  const rt = PIXI.RenderTexture.create({ width: w, height: h });
+
   try {
-    canvas.app.render();
+    // Render hidden group first – prepares masks for LOS / visibility cones
+    renderer.render(canvas.hidden, { renderTexture: rt, skipUpdateTransform: true, clear: false });
 
-    const view = renderer.view ?? renderer.canvas;
-    if (view) {
-      const offscreen = document.createElement("canvas");
-      offscreen.width = w;
-      offscreen.height = h;
-      const ctx = offscreen.getContext("2d");
-      ctx.drawImage(view, srcX, srcY, srcW, srcH, 0, 0, w, h);
+    // Background
+    renderer.render(canvas.primary.background, { renderTexture: rt, skipUpdateTransform: true });
 
-      const dataUrl = offscreen.toDataURL("image/png");
-      return dataUrl.replace(/^data:image\/png;base64,/, "");
+    // Visible tiles
+    for (const tile of canvas.tiles.placeables.filter(x => !x.document.hidden)) {
+      if (tile.mesh) renderer.render(tile.mesh, { renderTexture: rt, skipUpdateTransform: true, clear: false });
     }
-  } catch (err) {
-    console.warn("nanobanana-map-editor | canvas readback failed, trying render texture approach", err);
-  }
 
-  // --- Fallback: render texture approach ---
-  // Renders the stage container directly into an offscreen texture. This may
-  // miss some FoundryVTT-specific compositing but works when the canvas
-  // element is not readable.
-  try {
-    const renderTexture = PIXI.RenderTexture.create({
+    // Scene drawings (non-interface)
+    for (const drawing of canvas.drawings.placeables.filter(x => !x.document.hidden && !x.document.interface)) {
+      if (drawing.shape) renderer.render(drawing.shape, { renderTexture: rt, skipUpdateTransform: true, clear: false });
+    }
+
+    // Fog / Line of Sight / visibility
+    renderer.render(canvas.visibility, { renderTexture: rt, skipUpdateTransform: true, clear: false });
+
+    // Grid
+    if (canvas.interface?.grid?.mesh) {
+      renderer.render(canvas.interface.grid.mesh, { renderTexture: rt, skipUpdateTransform: true, clear: false });
+    }
+
+    // Visible tokens
+    for (const token of canvas.tokens.placeables.filter(x => !x.document.hidden)) {
+      if (token.mesh) renderer.render(token.mesh, { renderTexture: rt, skipUpdateTransform: true, clear: false });
+    }
+
+    // Informational drawings
+    for (const drawing of canvas.drawings.placeables.filter(x => !x.document.hidden && x.document.interface)) {
+      if (drawing.shape) renderer.render(drawing.shape, { renderTexture: rt, skipUpdateTransform: true, clear: false });
+    }
+
+    // Extract the rendered image as base64 PNG
+    const sprite = PIXI.Sprite.from(rt);
+    const result = await ImageHelper.createThumbnail(sprite, {
       width: w,
       height: h,
-      resolution: 1,
+      format: "image/png",
+      quality: 1.0,
     });
+    sprite.destroy();
 
-    const origX = stage.position.x;
-    const origY = stage.position.y;
-    const origScaleX = stage.scale.x;
-    const origScaleY = stage.scale.y;
-
-    stage.position.set(-rect.x, -rect.y);
-    stage.scale.set(1, 1);
-
-    try {
-      // PIXI v8 style (Foundry VTT v13+)
-      renderer.render({ container: stage, target: renderTexture });
-    } catch {
-      // PIXI v7 style
-      renderer.render(stage, { renderTexture });
-    }
-
-    stage.position.set(origX, origY);
-    stage.scale.set(origScaleX, origScaleY);
-
-    let dataUrl;
-    try {
-      const result = renderer.extract.canvas(renderTexture);
-      const c = (result instanceof Promise) ? await result : result;
-      dataUrl = c.toDataURL("image/png");
-    } catch {
-      dataUrl = await renderer.extract.base64(renderTexture, "image/png");
-    }
-
-    renderTexture.destroy(true);
-    return dataUrl.replace(/^data:image\/png;base64,/, "");
-  } catch (err) {
-    console.warn("nanobanana-map-editor | render texture capture also failed", err);
+    return result.thumb.replace(/^data:image\/png;base64,/, "");
+  } catch (error) {
+    console.error("nanobanana-map-editor | Capture error:", error);
+    throw new Error("Failed to capture canvas region");
+  } finally {
+    // Always restore the original renderer state
+    rt.destroy();
+    renderer.resolution = oldRes;
+    canvas._onResize();
+    canvas.pan(oldView);
   }
-
-  throw new Error("No capture method available");
 }
