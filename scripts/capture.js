@@ -89,15 +89,17 @@ export async function captureCanvasRegion(rect) {
 
     // Extract the rendered image as base64 PNG
     const sprite = PIXI.Sprite.from(rt);
-    const result = await ImageHelper.createThumbnail(sprite, {
-      width: w,
-      height: h,
-      format: "image/png",
-      quality: 1.0,
-    });
-    sprite.destroy();
-
-    return result.thumb.replace(/^data:image\/png;base64,/, "");
+    try {
+      const result = await ImageHelper.createThumbnail(sprite, {
+        width: w,
+        height: h,
+        format: "image/png",
+        quality: 1.0,
+      });
+      return result.thumb.replace(/^data:image\/png;base64,/, "");
+    } finally {
+      sprite.destroy();
+    }
   } catch (error) {
     console.error("nanobanana-map-editor | Capture error:", error);
     throw new Error("Failed to capture canvas region");
