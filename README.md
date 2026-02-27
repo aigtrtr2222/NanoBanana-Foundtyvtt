@@ -65,14 +65,15 @@ Go to **Settings → Module Settings → NanoBanana Map Editor**:
 | Setting | Description | Default |
 |---------|-------------|---------|
 | **API Key** | Your Google Generative AI API key | _(empty)_ |
-| **Model** | NanoBanana model to use for image generation | `gemini-2.0-flash-exp` |
+| **Model** | NanoBanana model to use for image generation | `gemini-2.5-flash-image` |
 
 ### Available Models / 사용 가능한 모델
 
 | Model ID | Description |
 |----------|-------------|
-| `gemini-2.0-flash-exp` | Gemini 2.0 Flash (Experimental) – fast, multimodal image editing |
-| `gemini-2.0-flash-preview-image-generation` | Gemini 2.0 Flash (Image Gen Preview) – image generation preview |
+| `gemini-2.5-flash-image` | Nano Banana – optimized for speed, efficiency, and high-volume low-latency tasks |
+| `gemini-3.1-flash-image-preview` | Nano Banana 2 – high-efficiency counterpart of Gemini 3 Pro Image, optimized for speed and high-volume developer use cases |
+| `gemini-3-pro-image-preview` | Nano Banana Pro – designed for professional asset creation with advanced reasoning for complex instructions and high-fidelity text rendering |
 
 ## Usage
 

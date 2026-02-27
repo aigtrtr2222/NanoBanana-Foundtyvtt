@@ -7,10 +7,19 @@ import { getSetting } from "./settings.js";
 
 /**
  * Available NanoBanana models for image generation/editing.
+ *
+ * Nano Banana is Gemini's native image generation capability.
+ * - Nano Banana: gemini-2.5-flash-image – optimized for speed and high-volume low-latency tasks.
+ * - Nano Banana 2: gemini-3.1-flash-image-preview – high-efficiency counterpart of Gemini 3 Pro Image.
+ * - Nano Banana Pro: gemini-3-pro-image-preview – designed for professional asset creation with
+ *   advanced reasoning for complex instructions and high-fidelity text rendering.
+ *
+ * All generated images include a SynthID watermark.
  */
 export const NANOBANANA_MODELS = {
-  "gemini-2.0-flash-exp": "Gemini 2.0 Flash (Experimental)",
-  "gemini-2.0-flash-preview-image-generation": "Gemini 2.0 Flash (Image Gen Preview)",
+  "gemini-2.5-flash-image": "Nano Banana (Gemini 2.5 Flash Image)",
+  "gemini-3.1-flash-image-preview": "Nano Banana 2 (Gemini 3.1 Flash Image Preview)",
+  "gemini-3-pro-image-preview": "Nano Banana Pro (Gemini 3 Pro Image Preview)",
 };
 
 /**
@@ -30,7 +39,7 @@ export async function sendImg2Img(imageBase64, options) {
     throw new Error(game.i18n.localize("NANOBANANA.ErrorNoApi"));
   }
 
-  const model = options.model || getSetting("model") || "gemini-2.0-flash-exp";
+  const model = options.model || getSetting("model") || "gemini-2.5-flash-image";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const payload = {

@@ -70,12 +70,27 @@ class NanoBananaSelectionLayer {
     this._active = false;
 
     if (this._container) {
+      // Immediately disable event processing to prevent PixiJS from dispatching
+      // further events (pointerout, pointermove) on this container.
+      this._container.eventMode = "none";
+
       this._container.off("pointerdown", this._onPointerDown);
       this._container.off("pointermove", this._onPointerMove);
       this._container.off("pointerup", this._onPointerUp);
       this._container.off("pointerupoutside", this._onPointerUp);
-      canvas.stage.removeChild(this._container);
-      this._container.destroy({ children: true });
+
+      // Defer removal from stage to avoid "Cannot find propagation path to
+      // disconnected target" errors when deactivate is called during an event
+      // handler (e.g. pointerup). PixiJS EventBoundary still references the
+      // container for the remainder of the current event dispatch cycle.
+      const containerRef = this._container;
+      requestAnimationFrame(() => {
+        if (containerRef.parent) {
+          containerRef.parent.removeChild(containerRef);
+        }
+        containerRef.destroy({ children: true });
+      });
+
       this._container = null;
       this._graphics = null;
     }
