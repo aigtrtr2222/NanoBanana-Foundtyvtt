@@ -1,46 +1,57 @@
 /**
  * NanoBanana Map Editor - API Communication
- * Handles communication with the NanoBanana2 (Stable Diffusion WebUI) API.
+ * Handles communication with the Google Generative AI (Gemini / Imagen) API.
  */
 
 import { getSetting } from "./settings.js";
 
 /**
- * Send an img2img request to the NanoBanana2 API.
+ * Available NanoBanana models for image generation/editing.
+ */
+export const NANOBANANA_MODELS = {
+  "gemini-2.0-flash-exp": "Gemini 2.0 Flash (Experimental)",
+  "gemini-2.0-flash-preview-image-generation": "Gemini 2.0 Flash (Image Gen Preview)",
+};
+
+/**
+ * Send an image editing request to the Google Generative AI API.
+ * Uses the Gemini model's generateContent endpoint with multimodal input
+ * (image + text prompt) to produce an edited image.
+ *
  * @param {string} imageBase64 - Base64-encoded source image (without data URI prefix)
  * @param {object} options - Generation options
- * @param {string} options.prompt - The positive prompt
- * @param {string} [options.negativePrompt] - The negative prompt
- * @param {number} [options.denoisingStrength] - Denoising strength (0.0-1.0)
- * @param {number} [options.steps] - Number of sampling steps
- * @param {number} [options.cfgScale] - CFG scale value
- * @param {string} [options.sampler] - Sampler name
- * @param {number} [options.width] - Output image width
- * @param {number} [options.height] - Output image height
+ * @param {string} options.prompt - The text prompt describing the desired edit
+ * @param {string} [options.model] - Model ID to use
  * @returns {Promise<string>} Base64-encoded result image
  */
 export async function sendImg2Img(imageBase64, options) {
-  const apiUrl = getSetting("apiUrl");
-  if (!apiUrl) {
+  const apiKey = getSetting("apiKey");
+  if (!apiKey) {
     throw new Error(game.i18n.localize("NANOBANANA.ErrorNoApi"));
   }
 
-  const baseUrl = apiUrl.replace(/\/+$/, "");
-  const endpoint = `${baseUrl}/sdapi/v1/img2img`;
+  const model = options.model || getSetting("model") || "gemini-2.0-flash-exp";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const payload = {
-    // Property names use snake_case as required by the Stable Diffusion WebUI API
-    init_images: [imageBase64],
-    prompt: options.prompt || "",
-    negative_prompt:
-      options.negativePrompt ?? getSetting("negativePrompt") ?? "",
-    denoising_strength:
-      options.denoisingStrength ?? getSetting("denoisingStrength") ?? 0.75,
-    steps: options.steps ?? getSetting("steps") ?? 20,
-    cfg_scale: options.cfgScale ?? getSetting("cfgScale") ?? 7,
-    sampler_name: options.sampler ?? getSetting("sampler") ?? "Euler a",
-    width: options.width || 512,
-    height: options.height || 512,
+    contents: [
+      {
+        parts: [
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: imageBase64,
+            },
+          },
+          {
+            text: options.prompt || "",
+          },
+        ],
+      },
+    ],
+    generationConfig: {
+      responseModalities: ["TEXT", "IMAGE"],
+    },
   };
 
   const response = await fetch(endpoint, {
@@ -58,30 +69,54 @@ export async function sendImg2Img(imageBase64, options) {
 
   const result = await response.json();
 
-  if (!result.images || result.images.length === 0) {
+  // Extract the generated image from the response
+  const candidates = result.candidates;
+  if (!candidates || candidates.length === 0) {
     throw new Error(
       game.i18n.format("NANOBANANA.ErrorApiFailed", {
-        error: "No images returned",
+        error: "No candidates returned",
       })
     );
   }
 
-  return result.images[0];
+  const parts = candidates[0]?.content?.parts;
+  if (!parts) {
+    throw new Error(
+      game.i18n.format("NANOBANANA.ErrorApiFailed", {
+        error: "No content parts returned",
+      })
+    );
+  }
+
+  // Find the first image part in the response
+  for (const part of parts) {
+    if (part.inlineData?.data) {
+      return part.inlineData.data;
+    }
+  }
+
+  throw new Error(
+    game.i18n.format("NANOBANANA.ErrorApiFailed", {
+      error: "No image returned in response",
+    })
+  );
 }
 
 /**
- * Check if the NanoBanana2 API is reachable.
+ * Check if the Google Generative AI API is reachable with the configured key.
  * @returns {Promise<boolean>}
  */
 export async function checkApiConnection() {
   try {
-    const apiUrl = getSetting("apiUrl");
-    if (!apiUrl) return false;
-    const baseUrl = apiUrl.replace(/\/+$/, "");
-    const response = await fetch(`${baseUrl}/sdapi/v1/sd-models`, {
-      method: "GET",
-      signal: AbortSignal.timeout(5000),
-    });
+    const apiKey = getSetting("apiKey");
+    if (!apiKey) return false;
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+      {
+        method: "GET",
+        signal: AbortSignal.timeout(5000),
+      }
+    );
     return response.ok;
   } catch {
     return false;

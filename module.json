@@ -1,7 +1,7 @@
 {
   "id": "nanobanana-map-editor",
   "title": "NanoBanana Map Editor",
-  "description": "Edit maps using NanoBanana2 AI image generation. Capture a region of the map, provide a prompt, and the AI-modified image is placed as a tile.",
+  "description": "Edit maps using NanoBanana (Google Generative AI) image generation. Capture a region of the map, provide a prompt, and the AI-modified image is placed as a tile.",
   "version": "1.0.0",
   "compatibility": {
     "minimum": "13",
