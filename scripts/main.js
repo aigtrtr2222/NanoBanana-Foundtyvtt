@@ -1,12 +1,12 @@
 /**
  * NanoBanana Map Editor - Main Module Entry Point
- * A Foundry VTT v13 module that allows editing maps using NanoBanana2 AI.
+ * A Foundry VTT v13 module that allows editing maps using NanoBanana (Google Generative AI).
  *
  * Workflow:
  * 1. User activates the NanoBanana tool from the scene controls
  * 2. User drags to select a rectangular region on the map
- * 3. A dialog appears with the captured region preview and a prompt input
- * 4. The captured image and prompt are sent to NanoBanana2 (img2img API)
+ * 3. A dialog appears with the captured region preview, model selection, and a prompt input
+ * 4. The captured image and prompt are sent to the Google Generative AI API
  * 5. The AI-generated result is placed as a tile on the map
  */
 
@@ -144,8 +144,8 @@ let selectionLayer = null;
 async function processSelection(rect) {
   try {
     // 1. Check API configuration
-    const apiUrl = getSetting("apiUrl");
-    if (!apiUrl) {
+    const apiKey = getSetting("apiKey");
+    if (!apiKey) {
       ui.notifications.error(game.i18n.localize("NANOBANANA.ErrorNoApi"));
       return;
     }
@@ -172,15 +172,12 @@ async function processSelection(rect) {
     const dialogResult = await showPromptDialog(capturedBase64, rect);
     if (!dialogResult) return; // User cancelled
 
-    // 5. Send to NanoBanana2 API
+    // 5. Send to Google Generative AI API
     ui.notifications.info(game.i18n.localize("NANOBANANA.Generating"));
 
     const resultBase64 = await sendImg2Img(capturedBase64, {
       prompt: dialogResult.prompt,
-      negativePrompt: dialogResult.negativePrompt,
-      denoisingStrength: dialogResult.denoisingStrength,
-      width: Math.round(rect.width),
-      height: Math.round(rect.height),
+      model: dialogResult.model,
     });
 
     // 6. Place as tile

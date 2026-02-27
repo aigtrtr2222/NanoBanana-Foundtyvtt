@@ -1,66 +1,30 @@
 /**
  * NanoBanana Map Editor - Module Settings
- * Registers all module settings for the NanoBanana2 API integration.
+ * Registers all module settings for the Google Generative AI (Gemini / Imagen) integration.
  */
+
+import { NANOBANANA_MODELS } from "./api.js";
 
 const MODULE_ID = "nanobanana-map-editor";
 
 export function registerSettings() {
-  game.settings.register(MODULE_ID, "apiUrl", {
-    name: game.i18n.localize("NANOBANANA.SettingsApiUrl"),
-    hint: game.i18n.localize("NANOBANANA.SettingsApiUrlHint"),
+  game.settings.register(MODULE_ID, "apiKey", {
+    name: game.i18n.localize("NANOBANANA.SettingsApiKey"),
+    hint: game.i18n.localize("NANOBANANA.SettingsApiKeyHint"),
     scope: "world",
     config: true,
     type: String,
-    default: "http://127.0.0.1:7860",
+    default: "",
   });
 
-  game.settings.register(MODULE_ID, "denoisingStrength", {
-    name: game.i18n.localize("NANOBANANA.SettingsDenoisingStrength"),
-    hint: game.i18n.localize("NANOBANANA.SettingsDenoisingStrengthHint"),
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 0.75,
-    range: { min: 0.0, max: 1.0, step: 0.05 },
-  });
-
-  game.settings.register(MODULE_ID, "steps", {
-    name: game.i18n.localize("NANOBANANA.SettingsSteps"),
-    hint: game.i18n.localize("NANOBANANA.SettingsStepsHint"),
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 20,
-    range: { min: 1, max: 150, step: 1 },
-  });
-
-  game.settings.register(MODULE_ID, "cfgScale", {
-    name: game.i18n.localize("NANOBANANA.SettingsCfgScale"),
-    hint: game.i18n.localize("NANOBANANA.SettingsCfgScaleHint"),
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 7,
-    range: { min: 1, max: 30, step: 0.5 },
-  });
-
-  game.settings.register(MODULE_ID, "sampler", {
-    name: game.i18n.localize("NANOBANANA.SettingsSampler"),
-    hint: game.i18n.localize("NANOBANANA.SettingsSamplerHint"),
+  game.settings.register(MODULE_ID, "model", {
+    name: game.i18n.localize("NANOBANANA.SettingsModel"),
+    hint: game.i18n.localize("NANOBANANA.SettingsModelHint"),
     scope: "world",
     config: true,
     type: String,
-    default: "Euler a",
-  });
-
-  game.settings.register(MODULE_ID, "negativePrompt", {
-    name: game.i18n.localize("NANOBANANA.SettingsNegativePrompt"),
-    hint: game.i18n.localize("NANOBANANA.SettingsNegativePromptHint"),
-    scope: "world",
-    config: true,
-    type: String,
-    default: "blurry, low quality, distorted, watermark, text",
+    default: "gemini-2.0-flash-exp",
+    choices: NANOBANANA_MODELS,
   });
 }
 
