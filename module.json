@@ -1,0 +1,38 @@
+{
+  "id": "nanobanana-map-editor",
+  "title": "NanoBanana Map Editor",
+  "description": "Edit maps using NanoBanana2 AI image generation. Capture a region of the map, provide a prompt, and the AI-modified image is placed as a tile.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13.351"
+  },
+  "authors": [
+    {
+      "name": "aigtrtr2222",
+      "url": "https://github.com/aigtrtr2222"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/nanobanana.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "ko",
+      "name": "한국어",
+      "path": "lang/ko.json"
+    }
+  ],
+  "url": "https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt",
+  "bugs": "https://github.com/aigtrtr2222/NanoBanana-Foundtyvtt/issues",
+  "license": "MIT",
+  "readme": "README.md"
+}
