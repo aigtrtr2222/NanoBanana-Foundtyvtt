@@ -5,8 +5,10 @@
 
 /**
  * Capture a rectangular region of the canvas as a base64 PNG string.
- * Uses PIXI RenderTexture as the primary method (reliable across WebGL and
- * WebGPU backends), with a canvas-element fallback for edge cases.
+ * Uses canvas readback as the primary method (preserves FoundryVTT's full
+ * rendering pipeline including background, lighting, and effects), with a
+ * PIXI RenderTexture fallback for backends where canvas readback is
+ * unavailable (e.g. WebGPU).
  *
  * @param {object} rect - The rectangle to capture in scene coordinates
  * @param {number} rect.x - Left edge in scene coordinates
@@ -22,10 +24,48 @@ export async function captureCanvasRegion(rect) {
   const w = Math.round(rect.width);
   const h = Math.round(rect.height);
 
-  // --- Primary method: render texture approach ---
-  // This is the most reliable method across WebGL and WebGPU backends because
-  // it renders to an offscreen texture using PIXI's own extract API, avoiding
-  // issues with preserveDrawingBuffer and canvas buffer accessibility.
+  // Compute the current stage transform so we can map scene coordinates to
+  // screen-pixel coordinates on the rendered canvas.
+  const scaleX = stage.scale.x;
+  const scaleY = stage.scale.y;
+  const offsetX = stage.position.x;
+  const offsetY = stage.position.y;
+
+  // Account for renderer resolution (e.g., high-DPI / Retina displays).
+  const resolution = renderer.resolution ?? window.devicePixelRatio ?? 1;
+
+  // Convert scene coordinates to canvas pixel coordinates
+  const srcX = Math.round((rect.x * scaleX + offsetX) * resolution);
+  const srcY = Math.round((rect.y * scaleY + offsetY) * resolution);
+  const srcW = Math.round(rect.width * scaleX * resolution);
+  const srcH = Math.round(rect.height * scaleY * resolution);
+
+  // --- Primary method: canvas readback ---
+  // Force a full render through FoundryVTT's normal pipeline so that all
+  // layers (background, tokens, lighting, etc.) are composited correctly,
+  // then crop the desired region from the canvas element.
+  try {
+    canvas.app.render();
+
+    const view = renderer.view ?? renderer.canvas;
+    if (view) {
+      const offscreen = document.createElement("canvas");
+      offscreen.width = w;
+      offscreen.height = h;
+      const ctx = offscreen.getContext("2d");
+      ctx.drawImage(view, srcX, srcY, srcW, srcH, 0, 0, w, h);
+
+      const dataUrl = offscreen.toDataURL("image/png");
+      return dataUrl.replace(/^data:image\/png;base64,/, "");
+    }
+  } catch (err) {
+    console.warn("nanobanana-map-editor | canvas readback failed, trying render texture approach", err);
+  }
+
+  // --- Fallback: render texture approach ---
+  // Renders the stage container directly into an offscreen texture. This may
+  // miss some FoundryVTT-specific compositing but works when the canvas
+  // element is not readable.
   try {
     const renderTexture = PIXI.RenderTexture.create({
       width: w,
@@ -64,43 +104,7 @@ export async function captureCanvasRegion(rect) {
     renderTexture.destroy(true);
     return dataUrl.replace(/^data:image\/png;base64,/, "");
   } catch (err) {
-    console.warn("nanobanana-map-editor | render texture capture failed, trying canvas extraction", err);
-  }
-
-  // --- Fallback: draw from the renderer's visible canvas element ---
-  // Force a fresh render so the canvas element contains up-to-date pixel data.
-  try {
-    renderer.render({ container: stage });
-  } catch {
-    try { renderer.render(stage); } catch (e) { console.debug("nanobanana-map-editor | forced render failed", e); }
-  }
-
-  const view = renderer.view ?? renderer.canvas;
-  if (view) {
-    const scaleX = stage.scale.x;
-    const scaleY = stage.scale.y;
-    const offsetX = stage.position.x;
-    const offsetY = stage.position.y;
-
-    // Account for renderer resolution (e.g., high-DPI / Retina displays).
-    // The canvas pixel buffer is scaled by the renderer's resolution factor,
-    // so screen coordinates must be multiplied accordingly.
-    const resolution = renderer.resolution ?? window.devicePixelRatio ?? 1;
-
-    // Convert scene coordinates to canvas pixel coordinates
-    const srcX = Math.round((rect.x * scaleX + offsetX) * resolution);
-    const srcY = Math.round((rect.y * scaleY + offsetY) * resolution);
-    const srcW = Math.round(rect.width * scaleX * resolution);
-    const srcH = Math.round(rect.height * scaleY * resolution);
-
-    const offscreen = document.createElement("canvas");
-    offscreen.width = w;
-    offscreen.height = h;
-    const ctx = offscreen.getContext("2d");
-    ctx.drawImage(view, srcX, srcY, srcW, srcH, 0, 0, w, h);
-
-    const dataUrl = offscreen.toDataURL("image/png");
-    return dataUrl.replace(/^data:image\/png;base64,/, "");
+    console.warn("nanobanana-map-editor | render texture capture also failed", err);
   }
 
   throw new Error("No capture method available");

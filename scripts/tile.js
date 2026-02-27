@@ -31,14 +31,17 @@ export async function placeTile(imageBase64, rect) {
   // Upload to the Foundry data directory
   const uploadDir = `nanobanana-map-editor`;
 
-  // Ensure the directory exists by using FilePicker
+  // Resolve the FilePicker class (v13 namespaced API or global fallback)
+  const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
+
+  // Ensure the directory exists
   try {
-    await FilePicker.createDirectory("data", uploadDir);
+    await FP.createDirectory("data", uploadDir);
   } catch {
     // Directory may already exist; ignore error
   }
 
-  const uploadResponse = await FilePicker.upload("data", uploadDir, file);
+  const uploadResponse = await FP.upload("data", uploadDir, file);
   if (!uploadResponse?.path) {
     throw new Error("Failed to upload generated image to server.");
   }
