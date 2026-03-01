@@ -117,6 +117,20 @@ To use style references when generating tokens:
 2. Optionally, add a `.txt` file with the same name as each image to provide a style description prompt.
 3. When generating a token, select which examples to use as style references from the gallery.
 
+#### Background Removal (AI Model) / 배경 제거 (AI 모델)
+
+The **Generate Token** feature includes an optional **Remove Background** checkbox. When enabled, it uses the [@imgly/background-removal](https://github.com/imgly/background-removal-js) library, which runs a U²-Net AI segmentation model directly in the browser to remove the background from the generated token image.
+
+**토큰 생성** 기능에는 **배경 제거** 체크박스 옵션이 포함되어 있습니다. 활성화하면 [@imgly/background-removal](https://github.com/imgly/background-removal-js) 라이브러리를 사용하여 브라우저에서 직접 U²-Net AI 세그멘테이션 모델을 실행하여 생성된 토큰 이미지의 배경을 제거합니다.
+
+**No separate installation is required.** The AI model is automatically downloaded from a CDN (`cdn.jsdelivr.net`) and cached in the browser the first time background removal is used. This may take a moment on first use depending on your internet connection.
+
+**별도의 설치가 필요하지 않습니다.** AI 모델은 배경 제거를 처음 사용할 때 CDN(`cdn.jsdelivr.net`)에서 자동으로 다운로드되어 브라우저에 캐시됩니다. 인터넷 연결 속도에 따라 처음 사용 시 잠시 시간이 걸릴 수 있습니다.
+
+> **Note / 참고:** Background removal runs entirely in the browser—no data is sent to any external server for this step. An active internet connection is needed only for the initial model download.
+>
+> 배경 제거는 전적으로 브라우저에서 실행됩니다. 이 단계에서는 데이터가 외부 서버로 전송되지 않습니다. 인터넷 연결은 초기 모델 다운로드에만 필요합니다.
+
 ## Module Structure
 
 ```
