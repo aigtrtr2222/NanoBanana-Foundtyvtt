@@ -69,7 +69,7 @@ export async function showPortraitEditDialog(actor) {
 
             try {
               ui.notifications.info(game.i18n.localize("NANOBANANA.PortraitGenerating"));
-              const portraitBase64 = await loadImageAsBase64(portraitPath);
+              const portraitBase64 = await loadImageAsBase64(actor.img);
               const resultBase64 = await sendImg2Img(portraitBase64, { prompt, model });
               const newPath = await uploadImage(resultBase64, "nanobanana-portrait");
               await updateActorPortrait(actor, newPath);
@@ -152,7 +152,7 @@ export async function showTokenEditDialog(actor) {
 
             try {
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenGenerating"));
-              const tokenBase64 = await loadImageAsBase64(tokenPath);
+              const tokenBase64 = await loadImageAsBase64(actor.prototypeToken?.texture?.src);
               const resultBase64 = await sendImg2Img(tokenBase64, { prompt, model });
               const newPath = await uploadImage(resultBase64, "nanobanana-token");
               await updateActorToken(actor, newPath);
@@ -280,8 +280,8 @@ export async function showTokenGenerateDialog(actor) {
 
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenGenerating"));
 
-              // Load portrait image
-              const portraitBase64 = await loadImageAsBase64(portraitPath);
+              // Load portrait image (read fresh from actor to pick up any recent edits)
+              const portraitBase64 = await loadImageAsBase64(actor.img);
 
               let resultBase64;
               if (selectedExamples.length > 0) {
