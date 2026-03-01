@@ -144,36 +144,38 @@ export async function scanTokenExamples() {
 }
 
 /**
- * Remove white/near-white background from a base64 image, making it transparent.
- * Uses canvas-based pixel manipulation.
+ * Remove background from a base64 image using shape-based segmentation (U²-Net).
+ * Uses @imgly/background-removal loaded from CDN for accurate foreground detection
+ * that preserves white/light-colored character features (hair, skin, clothing).
  * @param {string} imageBase64 - Base64-encoded image (without data URI prefix)
- * @param {number} [threshold=240] - Brightness threshold (0–255). Pixels with R, G, and B all above this value are made transparent.
  * @returns {Promise<string>} Base64-encoded PNG image with transparent background
  */
-export async function removeWhiteBackground(imageBase64, threshold = 240) {
+export async function removeBackground(imageBase64) {
+  // Dynamically load @imgly/background-removal from CDN
+  const { removeBackground: removeBg } = await import(
+    "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1/dist/index.js"
+  );
+
+  // Convert base64 to Blob for the library
+  const byteString = atob(imageBase64);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const inputBlob = new Blob([ab], { type: "image/png" });
+
+  // Run shape-based background removal (U²-Net segmentation)
+  const resultBlob = await removeBg(inputBlob);
+
+  // Convert result Blob back to base64
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i] >= threshold && data[i + 1] >= threshold && data[i + 2] >= threshold) {
-          data[i + 3] = 0; // Set alpha to 0 (transparent)
-        }
-      }
-      ctx.putImageData(imageData, 0, 0);
-
-      const resultDataUrl = canvas.toDataURL("image/png");
-      const resultBase64 = resultDataUrl.replace(/^data:image\/png;base64,/, "");
-      resolve(resultBase64);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result.replace(/^data:image\/[^;]+;base64,/, "");
+      resolve(base64);
     };
-    img.onerror = () => reject(new Error("Failed to load image for background removal: invalid image data"));
-    img.src = `data:image/png;base64,${imageBase64}`;
+    reader.onerror = () => reject(new Error("Failed to process background removal result"));
+    reader.readAsDataURL(resultBlob);
   });
 }

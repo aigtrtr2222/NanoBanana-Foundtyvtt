@@ -11,7 +11,7 @@ import {
   updateActorPortrait,
   updateActorToken,
   scanTokenExamples,
-  removeWhiteBackground,
+  removeBackground,
 } from "./portrait.js";
 
 /**
@@ -312,7 +312,7 @@ export async function showTokenGenerateDialog(actor) {
 
               // Remove white background if requested
               if (shouldRemoveBg) {
-                resultBase64 = await removeWhiteBackground(resultBase64);
+                resultBase64 = await removeBackground(resultBase64);
               }
 
               const newPath = await uploadImage(resultBase64, "nanobanana-token-gen");

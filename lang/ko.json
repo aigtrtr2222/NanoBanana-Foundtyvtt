@@ -48,6 +48,6 @@
   "NANOBANANA.TokenGenExamplesLabel": "토큰 스타일 예시 (참조할 예시를 선택하세요)",
   "NANOBANANA.TokenGenNoExamples": "토큰 예시를 찾을 수 없습니다. <code>nanobanana-map-editor/token-examples/</code> 폴더에 예시 토큰 이미지를 넣어주세요. 각 예시와 같은 이름의 .txt 파일을 추가하면 스타일 프롬프트를 포함할 수 있습니다.",
   "NANOBANANA.TokenGenPromptPlaceholder": "생성할 토큰 스타일을 설명하세요...",
-  "NANOBANANA.TokenGenDefaultPrompt": "이 포트레잇 이미지로부터 캐릭터 토큰을 생성해주세요. 제공된 예시 토큰을 스타일 참조로 사용하세요. 토큰은 원형이어야 하며, 가상 탁상 토큰으로 사용하기에 적합한 명확한 캐릭터 묘사여야 합니다.",
-  "NANOBANANA.TokenGenRemoveBg": "흰색 배경 제거 (투명하게 변환)"
+  "NANOBANANA.TokenGenDefaultPrompt": "이 포트레잇 이미지로부터 캐릭터 탑뷰 토큰을 생성해주세요. 제공된 예시 토큰을 스타일 참조로 사용하세요. 탑뷰 토큰은 바닥이 회색 원형이어야 하며, 가상 탁상 탑뷰 토큰으로 사용하기에 적합한 명확한 캐릭터 묘사여야 합니다. 피규어 모형재질 탑뷰토큰으로 제작하세요.",
+  "NANOBANANA.TokenGenRemoveBg": "배경 제거 (투명하게 변환)"
 }
