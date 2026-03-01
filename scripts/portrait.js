@@ -153,7 +153,7 @@ export async function scanTokenExamples() {
 export async function removeBackground(imageBase64) {
   // Dynamically load @imgly/background-removal from CDN
   const { removeBackground: removeBg } = await import(
-    "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1/dist/index.js"
+    "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1/+esm"
   );
 
   // Convert base64 to Blob for the library
