@@ -369,12 +369,15 @@ export async function showTokenGenerateDialog(actor) {
     dialog.render(true);
 
     // Wire up the prompt language selector to switch default prompts
+    let _retryCount = 0;
     const _wirePromptLangSelector = () => {
       const formEl =
         dialog.element?.querySelector?.("form.nanobanana-token-gen-dialog") ??
         document.querySelector(".nanobanana-token-gen-dialog");
       if (!formEl) {
-        setTimeout(_wirePromptLangSelector, 100);
+        if (++_retryCount < 20) {
+          setTimeout(_wirePromptLangSelector, 100);
+        }
         return;
       }
       const langSelect = formEl.querySelector('[name="promptLang"]');
