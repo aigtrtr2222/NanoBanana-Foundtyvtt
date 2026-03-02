@@ -92,8 +92,8 @@
 /* ------------------------------------------------------------------ */
 
 .nanobanana-examples-gallery {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   max-height: 200px;
   overflow-y: auto;
@@ -111,7 +111,6 @@
   border: 2px solid transparent;
   border-radius: 4px;
   transition: border-color 0.2s;
-  width: 80px;
 }
 
 .nanobanana-example-item:hover {
@@ -158,4 +157,19 @@
   padding: 1px 4px;
   border-radius: 2px;
   font-size: 0.9em;
+}
+
+/* Prompt description */
+.nanobanana-prompt-desc {
+  padding: 8px 12px;
+  background: var(--color-bg-option, #f9f9f9);
+  border: 1px solid var(--color-border-light-tertiary, #ccc);
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--color-text-secondary, #666);
+}
+
+.nanobanana-prompt-desc i {
+  margin-right: 4px;
+  color: #ff6600;
 }

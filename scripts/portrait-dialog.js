@@ -114,7 +114,7 @@ export async function showTokenEditDialog(actor) {
     .join("");
 
   const content = `
-    <form class="nanobanana-dialog nanobanana-portrait-dialog">
+    <form class="nanobanana-dialog nanobanana-portrait-dialog nanobanana-token-edit-dialog">
       <div class="form-group">
         <div class="preview-container">
           <img src="${_escapeHtml(tokenPath)}" alt="Token"/>
@@ -128,6 +128,12 @@ export async function showTokenEditDialog(actor) {
       <div class="form-group">
         <label>${game.i18n.localize("NANOBANANA.DialogPromptLabel")}</label>
         <textarea name="prompt" placeholder="${game.i18n.localize("NANOBANANA.TokenPromptPlaceholder")}"></textarea>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="removeBackground" checked />
+          ${game.i18n.localize("NANOBANANA.TokenGenRemoveBg")}
+        </label>
       </div>
     </form>
   `;
@@ -151,9 +157,16 @@ export async function showTokenEditDialog(actor) {
             }
 
             try {
+              const shouldRemoveBg = _getCheckboxValue(dialogRef, "removeBackground", ".nanobanana-token-edit-dialog");
+
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenGenerating"));
               const tokenBase64 = await loadImageAsBase64(tokenPath);
-              const resultBase64 = await sendImg2Img(tokenBase64, { prompt, model });
+              let resultBase64 = await sendImg2Img(tokenBase64, { prompt, model });
+
+              if (shouldRemoveBg) {
+                resultBase64 = await removeBackground(resultBase64);
+              }
+
               const newPath = await uploadImage(resultBase64, "nanobanana-token");
               await updateActorToken(actor, newPath);
               ui.notifications.info(game.i18n.localize("NANOBANANA.TokenSuccess"));
@@ -208,7 +221,7 @@ export async function showTokenGenerateDialog(actor) {
       .map(
         (ex, idx) => `
         <label class="nanobanana-example-item">
-          <input type="checkbox" name="example-${idx}" value="${idx}" checked />
+          <input type="checkbox" name="example-${idx}" value="${idx}" />
           <img src="${_escapeHtml(ex.path)}" alt="${_escapeHtml(ex.name)}" title="${_escapeHtml(ex.name)}${ex.prompt ? "\n" + _escapeHtml(ex.prompt) : ""}" />
           <span class="example-name">${_escapeHtml(ex.name)}</span>
         </label>`
@@ -229,6 +242,9 @@ export async function showTokenGenerateDialog(actor) {
       </div>`;
   }
 
+  const defaultPromptKo = game.i18n.localize("NANOBANANA.TokenGenDefaultPrompt");
+  const defaultPromptEn = game.i18n.localize("NANOBANANA.TokenGenDefaultPromptEN");
+
   const content = `
     <form class="nanobanana-dialog nanobanana-portrait-dialog nanobanana-token-gen-dialog">
       <div class="form-group">
@@ -243,8 +259,21 @@ export async function showTokenGenerateDialog(actor) {
         <select name="model">${modelOptions}</select>
       </div>
       <div class="form-group">
+        <div class="nanobanana-prompt-desc">
+          <i class="fas fa-info-circle"></i>
+          ${game.i18n.localize("NANOBANANA.TokenGenPromptDesc")}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>${game.i18n.localize("NANOBANANA.TokenGenPromptLangLabel")}</label>
+        <select name="promptLang" class="nanobanana-prompt-lang-select">
+          <option value="ko">${game.i18n.localize("NANOBANANA.TokenGenPromptLangKo")}</option>
+          <option value="en">${game.i18n.localize("NANOBANANA.TokenGenPromptLangEn")}</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>${game.i18n.localize("NANOBANANA.DialogPromptLabel")}</label>
-        <textarea name="prompt" placeholder="${game.i18n.localize("NANOBANANA.TokenGenPromptPlaceholder")}">${game.i18n.localize("NANOBANANA.TokenGenDefaultPrompt")}</textarea>
+        <textarea name="prompt" placeholder="${game.i18n.localize("NANOBANANA.TokenGenPromptPlaceholder")}">${defaultPromptKo}</textarea>
       </div>
       <div class="form-group">
         <label>
@@ -338,6 +367,29 @@ export async function showTokenGenerateDialog(actor) {
       close: () => resolve(null),
     });
     dialog.render(true);
+
+    // Wire up the prompt language selector to switch default prompts
+    let _retryCount = 0;
+    const _wirePromptLangSelector = () => {
+      const formEl =
+        dialog.element?.querySelector?.("form.nanobanana-token-gen-dialog") ??
+        document.querySelector(".nanobanana-token-gen-dialog");
+      if (!formEl) {
+        if (++_retryCount < 20) {
+          setTimeout(_wirePromptLangSelector, 100);
+        }
+        return;
+      }
+      const langSelect = formEl.querySelector('[name="promptLang"]');
+      const promptArea = formEl.querySelector('[name="prompt"]');
+      if (langSelect && promptArea) {
+        langSelect.addEventListener("change", () => {
+          const lang = langSelect.value;
+          promptArea.value = lang === "en" ? defaultPromptEn : defaultPromptKo;
+        });
+      }
+    };
+    setTimeout(_wirePromptLangSelector, 200);
   });
 }
 
@@ -429,7 +481,7 @@ function _getSelectedExamples(dialogRef, examples) {
 /**
  * Get the value of a named checkbox from a DialogV2 callback reference.
  */
-function _getCheckboxValue(dialogRef, name) {
+function _getCheckboxValue(dialogRef, name, fallbackSelector = ".nanobanana-token-gen-dialog") {
   let formEl;
 
   if (dialogRef?.element) {
@@ -440,7 +492,7 @@ function _getCheckboxValue(dialogRef, name) {
 
   // DOM fallback
   if (!formEl) {
-    formEl = document.querySelector(".nanobanana-token-gen-dialog");
+    formEl = document.querySelector(fallbackSelector);
   }
 
   if (!formEl) return false;
