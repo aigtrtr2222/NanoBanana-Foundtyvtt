@@ -53,28 +53,51 @@
 }
 
 /* ------------------------------------------------------------------ */
-/*  Portrait / Token Buttons (injected above character sheet tabs)     */
+/* Portrait / Token Buttons (Character Sheet Toolbar)                 */
 /* ------------------------------------------------------------------ */
 
 .nanobanana-portrait-buttons {
   display: flex;
-  gap: 4px;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
-  margin-bottom: 4px;
   flex-wrap: wrap;
+  gap: 4px;
+
+  padding: 4px 0;
+  margin-bottom: 4px;
+
+  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
+
+  max-width: 100%;
+  align-items: center;
+}
+
+/* Prevent Foundry flex stretch bug */
+.nanobanana-portrait-buttons > * {
+  flex: 0 0 auto;
 }
 
 .nanobanana-portrait-btn {
-  font-size: 0.75rem;
-  padding: 2px 6px;
+  flex: 0 0 auto;
+
+  width: auto;
+  max-width: 160px;
+  height: 24px;
+  line-height: 22px;
+
+  padding: 0 8px;
+
+  font-size: 12px;
+  white-space: nowrap;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   cursor: pointer;
+
   border: 1px solid var(--color-border-light-tertiary, #999);
   border-radius: 3px;
+
   background: var(--color-bg-btn, linear-gradient(to bottom, #f0f0f0, #ddd));
   color: var(--color-text-primary, #333);
-  line-height: 1.4;
-  white-space: nowrap;
 }
 
 .nanobanana-portrait-btn:hover {
@@ -88,16 +111,19 @@
 }
 
 /* ------------------------------------------------------------------ */
-/*  Token Examples Gallery                                             */
+/* Token Examples Gallery                                             */
 /* ------------------------------------------------------------------ */
 
 .nanobanana-examples-gallery {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
+
   max-height: 200px;
   overflow-y: auto;
+
   padding: 4px;
+
   border: 1px solid var(--color-border-light-tertiary, #ccc);
   border-radius: 4px;
 }
@@ -106,10 +132,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
   cursor: pointer;
+
   padding: 4px;
+
   border: 2px solid transparent;
   border-radius: 4px;
+
   transition: border-color 0.2s;
 }
 
@@ -124,7 +154,9 @@
 .nanobanana-example-item img {
   width: 60px;
   height: 60px;
+
   object-fit: cover;
+
   border-radius: 50%;
   border: 1px solid #999;
 }
@@ -132,17 +164,24 @@
 .nanobanana-example-item .example-name {
   font-size: 0.7em;
   text-align: center;
+
   word-break: break-word;
+
   margin-top: 2px;
+
   color: var(--color-text-secondary, #666);
 }
 
 .nanobanana-no-examples {
   padding: 12px;
+
   text-align: center;
+
   color: var(--color-text-secondary, #888);
   font-size: 0.85em;
+
   background: var(--color-bg-option, #f9f9f9);
+
   border-radius: 4px;
   border: 1px dashed var(--color-border-light-tertiary, #ccc);
 }
@@ -154,17 +193,24 @@
 
 .nanobanana-no-examples code {
   background: rgba(0, 0, 0, 0.1);
+
   padding: 1px 4px;
+
   border-radius: 2px;
+
   font-size: 0.9em;
 }
 
 /* Prompt description */
+
 .nanobanana-prompt-desc {
   padding: 8px 12px;
+
   background: var(--color-bg-option, #f9f9f9);
+
   border: 1px solid var(--color-border-light-tertiary, #ccc);
   border-radius: 4px;
+
   font-size: 0.85em;
   color: var(--color-text-secondary, #666);
 }
