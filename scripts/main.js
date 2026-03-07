@@ -379,20 +379,19 @@ function _injectPortraitButtons(sheet, html) {
     </button>
   `;
 
-  if (tabs) {
-    tabs.parentNode.insertBefore(bar, tabs);
-  } else {
-    // Fallback: insert at the top of the sheet body or header for v2 sheets
-    // that may not use a traditional tab navigation structure
-    const body =
-      element.querySelector(".sheet-body") ??
-      element.querySelector(".window-content");
-    if (body) {
-      body.prepend(bar);
-    } else {
-      return;
-    }
-  }
+// Prefer inserting into the sheet header to avoid layout stretching
+const header = element.querySelector(".sheet-header");
+
+if (header) {
+  header.appendChild(bar);
+} else if (tabs) {
+  tabs.before(bar);
+} else {
+  const body =
+    element.querySelector(".sheet-body") ??
+    element.querySelector(".window-content");
+  if (body) body.prepend(bar);
+}
 
   // Wire up click handlers
   bar.querySelector('[data-action="edit-portrait"]').addEventListener("click", (ev) => {
