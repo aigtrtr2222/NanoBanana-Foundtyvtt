@@ -68,6 +68,12 @@
 
   max-width: 100%;
   align-items: center;
+
+  
+  flex: 0 0 auto;          
+  height: max-content;     
+  width: 100%;             
+  align-self: flex-start;  
 }
 
 /* Prevent Foundry flex stretch bug */
